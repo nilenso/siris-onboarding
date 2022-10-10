@@ -2,10 +2,15 @@ package tddbyexample
 
 type Dollar struct {
 	amount int
+	Money
 }
 
 type Franc struct {
 	amount int
+	Money
+}
+
+type Money struct {
 }
 
 func newDollar(amount int) *Dollar {
