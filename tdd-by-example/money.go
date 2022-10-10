@@ -1,20 +1,19 @@
 package tddbyexample
 
 type Dollar struct {
-	amount int
 	Money
 }
 
 type Franc struct {
-	amount int
 	Money
 }
 
 type Money struct {
+	amount int
 }
 
 func newDollar(amount int) *Dollar {
-	return &Dollar{amount: amount}
+	return &Dollar{Money{amount: amount}}
 }
 
 func (d *Dollar) times(multiplier int) *Dollar {
@@ -27,7 +26,7 @@ func (d *Dollar) equals(object interface{}) bool {
 }
 
 func newFranc(amount int) *Franc {
-	return &Franc{}
+	return &Franc{Money{amount: amount}}
 }
 
 func (f *Franc) times(multiplier int) *Franc {
@@ -38,3 +37,4 @@ func (f *Franc) equals(object interface{}) bool {
 	franc := object.(*Franc)
 	return f.amount == franc.amount
 }
+
