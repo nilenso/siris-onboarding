@@ -14,7 +14,9 @@ func TestMultiplication(t *testing.T) {
 
 func TestSimpleAddition(t *testing.T) {
 	sum := dollar(5).plus(dollar(5))
-	assert.Equal(t, dollar(10), sum)
+	bank := new(Bank)
+	reduced := bank.reduce(sum, "USD")
+	assert.Equal(t, dollar(10), reduced)
 }
 
 func TestEquality(t *testing.T) {
