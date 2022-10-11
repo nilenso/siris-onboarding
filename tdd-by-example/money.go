@@ -1,13 +1,5 @@
 package tddbyexample
 
-type Dollar struct {
-	Money
-}
-
-type Franc struct {
-	Money
-}
-
 type IMoney interface {
 	equals(money IMoney) bool
 	times(multiplier int) IMoney
@@ -21,11 +13,11 @@ type Money struct {
 }
 
 func newDollar(amount int) IMoney {
-	return &Dollar{Money{amount: amount, currency: "USD"}}
+	return newMoney(amount, "USD")
 }
 
 func newFranc(amount int) IMoney {
-	return &Franc{Money{amount: amount, currency: "CHF"}}
+	return newMoney(amount, "CHF")
 }
 
 func newMoney(amount int, currency string) IMoney {
