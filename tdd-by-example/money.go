@@ -2,9 +2,9 @@ package tddbyexample
 
 type IMoney interface {
 	equals(money IMoney) bool
-	times(multiplier int) IMoney
 	Amount() int
 	Currency() string
+	times(multiplier int) IMoney
 }
 
 type Money struct {
@@ -12,15 +12,15 @@ type Money struct {
 	currency string
 }
 
-func newDollar(amount int) IMoney {
-	return newMoney(amount, "USD")
+func dollar(amount int) IMoney {
+	return NewMoney(amount, "USD")
 }
 
-func newFranc(amount int) IMoney {
-	return newMoney(amount, "CHF")
+func franc(amount int) IMoney {
+	return NewMoney(amount, "CHF")
 }
 
-func newMoney(amount int, currency string) IMoney {
+func NewMoney(amount int, currency string) IMoney {
 	return &Money{amount: amount, currency: currency}
 }
 
@@ -29,7 +29,7 @@ func (m *Money) equals(money IMoney) bool {
 }
 
 func (m *Money) times(multiplier int) IMoney {
-	return newMoney(m.amount*multiplier, m.currency)
+	return NewMoney(m.amount*multiplier, m.currency)
 }
 
 func (m *Money) Amount() int {
