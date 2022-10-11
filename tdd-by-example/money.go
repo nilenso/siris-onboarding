@@ -5,6 +5,7 @@ type IMoney interface {
 	Amount() int
 	Currency() string
 	times(multiplier int) IMoney
+	plus(addend IMoney) IMoney
 }
 
 type Money struct {
@@ -30,6 +31,10 @@ func (m *Money) equals(money IMoney) bool {
 
 func (m *Money) times(multiplier int) IMoney {
 	return NewMoney(m.amount*multiplier, m.currency)
+}
+
+func (m *Money) plus(addend IMoney) IMoney {
+	return NewMoney(m.amount+addend.Amount(), m.currency)
 }
 
 func (m *Money) Amount() int {

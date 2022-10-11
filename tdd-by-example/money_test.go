@@ -12,6 +12,11 @@ func TestMultiplication(t *testing.T) {
 	assert.True(t, dollar(15).equals(five.times(3)))
 }
 
+func TestSimpleAddition(t *testing.T) {
+	sum := dollar(5).plus(dollar(5))
+	assert.Equal(t, dollar(10), sum)
+}
+
 func TestEquality(t *testing.T) {
 	assert.True(t, dollar(5).equals(dollar(5)))
 	assert.False(t, dollar(5).equals(dollar(6)))
