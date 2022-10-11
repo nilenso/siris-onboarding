@@ -28,8 +28,8 @@ func newFranc(amount int) IMoney {
 	return &Franc{Money{amount: amount, currency: "CHF"}}
 }
 
-func newMoney(amount int) IMoney {
-	return &Money{amount: amount}
+func newMoney(amount int, currency string) IMoney {
+	return &Money{amount: amount, currency: currency}
 }
 
 func (m *Money) equals(money IMoney) bool {
@@ -37,7 +37,7 @@ func (m *Money) equals(money IMoney) bool {
 }
 
 func (m *Money) times(multiplier int) IMoney {
-	return newMoney(m.amount * multiplier)
+	return newMoney(m.amount*multiplier, m.currency)
 }
 
 func (m *Money) Amount() int {
