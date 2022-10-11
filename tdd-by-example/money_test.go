@@ -32,3 +32,12 @@ func TestAmount(t *testing.T) {
 func TestCurrency(t *testing.T) {
 	assert.Equal(t, "USD", dollar(1).Currency())
 }
+
+func TestPlusReturnsSum(t *testing.T) {
+	five := dollar(5)
+	result := five.plus(five)
+	sum := result.(*Sum)
+	assert.Equal(t, five, sum.augend)
+	assert.Equal(t, five, sum.addend)
+}
+
