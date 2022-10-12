@@ -45,3 +45,7 @@ func (m *Money) Amount() int {
 func (m *Money) Currency() string {
 	return m.currency
 }
+
+func (m *Money) reduce(to string) IMoney {
+	return m
+}

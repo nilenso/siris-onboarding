@@ -41,3 +41,15 @@ func TestPlusReturnsSum(t *testing.T) {
 	assert.Equal(t, five, sum.addend)
 }
 
+func TestReduceSum(t *testing.T) {
+	sum := NewSum(dollar(3), dollar(4))
+	bank := new(Bank)
+	result := bank.reduce(sum, "USD")
+	assert.Equal(t, dollar(7), result)
+}
+
+func TestReduceMoney(t *testing.T) {
+	bank := new(Bank)
+	result := bank.reduce(dollar(1), "USD")
+	assert.Equal(t, dollar(1), result)
+}
