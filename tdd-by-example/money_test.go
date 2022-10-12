@@ -14,7 +14,7 @@ func TestMultiplication(t *testing.T) {
 
 func TestSimpleAddition(t *testing.T) {
 	sum := dollar(5).plus(dollar(5))
-	bank := new(Bank)
+	bank := NewBank()
 	reduced := bank.reduce(sum, "USD")
 	assert.Equal(t, dollar(10), reduced)
 }
@@ -43,13 +43,24 @@ func TestPlusReturnsSum(t *testing.T) {
 
 func TestReduceSum(t *testing.T) {
 	sum := NewSum(dollar(3), dollar(4))
-	bank := new(Bank)
+	bank := NewBank()
 	result := bank.reduce(sum, "USD")
 	assert.Equal(t, dollar(7), result)
 }
 
 func TestReduceMoney(t *testing.T) {
-	bank := new(Bank)
+	bank := NewBank()
 	result := bank.reduce(dollar(1), "USD")
 	assert.Equal(t, dollar(1), result)
+}
+
+func TestReduceMoneyDifferentCurrency(t *testing.T) {
+	bank := NewBank()
+	bank.addRate("CHF", "USD", 2)
+	result := bank.reduce(franc(2), "USD")
+	assert.Equal(t, dollar(1), result)
+}
+
+func TestIdentityRate(t *testing.T) {
+	assert.Equal(t, 1, NewBank().rate("USD", "USD"))
 }

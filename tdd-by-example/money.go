@@ -46,6 +46,7 @@ func (m *Money) Currency() string {
 	return m.currency
 }
 
-func (m *Money) reduce(to string) IMoney {
-	return m
+func (m *Money) reduce(bank *Bank, to string) IMoney {
+	rate := bank.rate(m.currency, to)
+	return NewMoney(m.amount/rate, to)
 }
