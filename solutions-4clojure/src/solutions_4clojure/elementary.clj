@@ -9,7 +9,10 @@
 
 ;Problem 6, Vectors
 ;(= [__] (list :a :b :c) (vec '(:a :b :c)) (vector :a :b :c))
-(= [:a :b :c] (list :a :b :c) (vec '(:a :b :c)) (vector :a :b :c))
+(= [:a :b :c]
+   (list :a :b :c)
+   (vec '(:a :b :c))
+   (vector :a :b :c))
 
 ;Problem 7, conj on vectors
 ;(= __ (conj [1 2 3] 4))
@@ -75,7 +78,8 @@
 ;(= (__ "Dave") "Hello, Dave!")
 ;(= (__ "Jenn") "Hello, Jenn!")
 ;(= (__ "Rhea") "Hello, Rhea!")
-(defn hello [name] (format "Hello, %s!" name))
+(defn hello [name]
+  (format "Hello, %s!" name))
 (= (hello "Dave") "Hello, Dave!")
 (= (hello "Jenn") "Hello, Jenn!")
 (= (hello "Rhea") "Hello, Rhea!")
@@ -86,7 +90,9 @@
 
 ;Problem 18, filter
 ;(= __ (filter #(> % 5) '(3 4 5 6 7)))
-(= '(6 7) (filter #(> % 5) '(3 4 5 6 7)))
+(= '(6 7) (filter
+            #(> % 5)
+            '(3 4 5 6 7)))
 
 ;Problem 35, Local bindings
 ;(= __ (let [x 5] (+ 2 x)))
@@ -106,5 +112,6 @@
 
 ;Problem 37, Regular Expressions
 ;(= __ (apply str (re-seq #"[A-Z]+" "bA1B3Ce ")))
-(= "ABC" (apply str (re-seq #"[A-Z]+" "bA1B3Ce ")))
+(= "ABC" (apply str
+                (re-seq #"[A-Z]+" "bA1B3Ce ")))
 
