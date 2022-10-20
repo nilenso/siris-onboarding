@@ -7,14 +7,20 @@
 ;(= (__ [1 2 3 4 5]) 5)
 ;(= (__ '(5 4 3)) 3)
 ;(= (__ ["b" "c" "d"]) "d")
-(defn get-last [x]
-  (if (empty? (rest x))
-    (first x)
-    (get-last (rest x))))
+(defn get-last [lst]
+  (if (empty? (rest lst))
+    (first lst)
+    (get-last (rest lst))))
 
 (= (get-last [1 2 3 4 5]) 5)
 (= (get-last '(5 4 3)) 3)
 (= (get-last ["b" "c" "d"]) "d")
+
+(defn get-last-simple [l]
+  (first (reverse l)))
+(= (get-last-simple [1 2 3 4 5]) 5)
+(= (get-last-simple '(5 4 3)) 3)
+(= (get-last-simple ["b" "c" "d"]) "d")
 
 ;Problem 20, Penultimate Element
 ;Difficulty: easy
@@ -29,21 +35,21 @@
 ;  (if (empty? (rest (rest lst)))
 ;    (first lst)
 ;    (my-pen (rest lst))))
-(defn penultimate [x]
-  (if (empty? (rest (rest x)))
-    (first x)
-    (penultimate (rest x))))
+(defn penultimate [lst]
+  (if (empty? (rest (rest lst)))
+    (first lst)
+    (penultimate (rest lst))))
 
 (= (penultimate (list 1 2 3 4 5)) 4)
 (= (penultimate ["a" "b" "c"]) "b")
 (= (penultimate [[1 2] [3 4]]) [1 2])
 (= (penultimate [1]) nil)                                   ;fails, penultimate doesn't check for collections of length 1
 
-(defn penultimate-v2 [x]
-  (let [c (count x)]
+(defn penultimate-v2 [lst]
+  (let [c (count lst)]
     (cond
-      (= c 2) (first x)
-      (> c 2) (penultimate-v2 (rest x))
+      (= c 2) (first lst)
+      (> c 2) (penultimate-v2 (rest lst))
       :else nil)))
 
 (= (penultimate-v2 (list 1 2 3 4 5)) 4)
@@ -51,8 +57,8 @@
 (= (penultimate-v2 [[1 2] [3 4]]) [1 2])
 (= (penultimate-v2 [1]) nil)
 
-(defn penultimate-simple [x]
-  (second (reverse x)))
+(defn penultimate-simple [lst]
+  (second (reverse lst)))
 
 (= (penultimate-simple (list 1 2 3 4 5)) 4)
 (= (penultimate-simple ["a" "b" "c"]) "b")
@@ -65,29 +71,36 @@
 ;(= (__ [:a :b :c] 0) :a)
 ;(= (__ [1 2 3 4] 1) 2)
 ;(= (__ '([1 2] [3 4] [5 6]) 2) [5 6])
-;(defn get-nth [x n]
-;  reduce (fn [x index n] (if (= index n)
-;                           (first x)
-;                           (get-nth (rest x) n))) x)
 
-(defn get-nth [x n]
-  (reduce (fn [index elem]
+(defn get-nth [lst n]
+  (reduce (fn [index element]
             (if (= n index)
-              (reduced elem)
-              (+ 1 index))) 0 x))
+              (reduced element)
+              (+ 1 index)))
+          0
+          lst))
 
 (= (get-nth '(4 5 6 7) 2) 6)
 (= (get-nth [:a :b :c] 0) :a)
 (= (get-nth [1 2 3 4] 1) 2)
 (= (get-nth '([1 2] [3 4] [5 6]) 2) [5 6])
 
-(defn get-nth-simple [x n]
-  (last (take (+ n 1) x)))
+(defn get-nth-simple [lst index]
+  (last (take (+ index 1) lst)))
 
 (= (get-nth-simple '(4 5 6 7) 2) 6)
 (= (get-nth-simple [:a :b :c] 0) :a)
 (= (get-nth-simple [1 2 3 4] 1) 2)
 (= (get-nth-simple '([1 2] [3 4] [5 6]) 2) [5 6])
+
+(defn get-nth-simple-v2 [collection index]
+  (first (drop
+           index
+           collection)))
+(= (get-nth-simple-v2 '(4 5 6 7) 2) 6)
+(= (get-nth-simple-v2 [:a :b :c] 0) :a)
+(= (get-nth-simple-v2 [1 2 3 4] 1) 2)
+(= (get-nth-simple-v2 '([1 2] [3 4] [5 6]) 2) [5 6])
 
 ;Problem 22, Count a Sequence
 ;Write a function which returns the total number of elements in a sequence.
@@ -96,8 +109,10 @@
 ;(= (__ [[1 2] [3 4] [5 6]]) 3)
 ;(= (__ '(13)) 1)
 ;(= (__ '(:a :b :c)) 3)
-(defn count-seq [x]
-  (reduce (fn [c _] (+ c 1)) 0 x))
+(defn count-seq [collection]
+  (reduce (fn [c _] (+ c 1))
+          0
+          collection))
 
 (= (count-seq '(1 2 3 3 1)) 5)
 (= (count-seq "Hello World") 11)
@@ -110,8 +125,11 @@
 ;(= (__ [1 2 3 4 5]) [5 4 3 2 1])
 ;(= (__ (sorted-set 5 7 2 7)) '(7 5 2))
 ;(= (__ [[1 2][3 4][5 6]]) [[5 6][3 4][1 2]])
-(defn reverse-seq [x]
-  (reduce (fn [rev elem] (cons elem rev)) nil x))
+(defn reverse-seq [collection]
+  (reduce (fn [rev elem]
+            (cons elem rev))
+          '()
+          collection))
 (= (reverse-seq [1 2 3 4 5]) [5 4 3 2 1])
 (= (reverse-seq (sorted-set 5 7 2 7)) '(7 5 2))
 (= (reverse-seq [[1 2][3 4][5 6]]) [[5 6][3 4][1 2]])
@@ -123,13 +141,24 @@
 ;(= (__ #{4 2 1}) 7)
 ;(= (__ '(0 0 -1)) -1)
 ;(= (__ '(1 10 3)) 14)
-(defn sum [x]
-  (reduce (fn [s elem] (+ s elem)) 0 x))
+(defn sum [lst]
+  (reduce + lst))
+
 (= (sum [1 2 3]) 6)
 (= (sum (list 0 -2 5 5)) 8)
 (= (sum #{4 2 1}) 7)
 (= (sum '(0 0 -1)) -1)
 (= (sum '(1 10 3)) 14)
+
+(defn sum-v2 [collection]
+  (apply + collection))
+
+(= (sum-v2 [1 2 3]) 6)
+(= (sum-v2 (list 0 -2 5 5)) 8)
+(= (sum-v2 #{4 2 1}) 7)
+(= (sum-v2 '(0 0 -1)) -1)
+(= (sum-v2 '(1 10 3)) 14)
+
 
 ;Problem 25, Find the odd numbers
 ;Write a function which returns only the odd numbers from a sequence.
@@ -137,8 +166,9 @@
 ;(= (__ [4 2 1 6]) '(1))
 ;(= (__ [2 2 4 6]) '())
 ;(= (__ [1 1 1 3]) '(1 1 1 3))
-(defn odd [x]
-  (filter odd? x))
+(defn odd [lst]
+  (filter odd? lst))
+
 (= (odd #{1 2 3 4 5}) '(1 3 5))
 (= (odd [4 2 1 6]) '(1))
 (= (odd [2 2 4 6]) '())
@@ -156,7 +186,12 @@
   :else (reduce (fn [out _]
                   (conj
                     out
-                    (+ (last out) (nth out (- (count out) 2)))))
+                    (+
+                      (last out)
+                      (nth out
+                           (-
+                             (count out)
+                             2)))))
                 [1 1]
                 (range 0 (- n 2)))))
 
