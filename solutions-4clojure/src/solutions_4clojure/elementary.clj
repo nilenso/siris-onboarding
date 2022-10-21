@@ -115,3 +115,11 @@
 (= "ABC" (apply str
                 (re-seq #"[A-Z]+" "bA1B3Ce ")))
 
+;Problem 52, Intro to Destructuring
+;Let bindings and function parameter lists support destructuring.
+;(= [2 4] (let [[a b c d e f g] (range)] __))
+
+(= [2 4] (let [[a b c d e f g] (range)] [c e]))
+
+
+

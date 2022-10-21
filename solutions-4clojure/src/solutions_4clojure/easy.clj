@@ -1,7 +1,6 @@
 (ns solutions-4clojure.easy)
 
 ;Problem 19, Last Element
-;Difficulty: easy
 ;Write a function which returns the last element in a sequence.
 ;
 ;(= (__ [1 2 3 4 5]) 5)
@@ -23,18 +22,11 @@
 (= (get-last-simple ["b" "c" "d"]) "d")
 
 ;Problem 20, Penultimate Element
-;Difficulty: easy
 ;Write a function which returns the second to last element from a sequence.
-;
 ;(= (__ (list 1 2 3 4 5)) 4)
 ;(= (__ ["a" "b" "c"]) "b")
 ;(= (__ [[1 2] [3 4]]) [1 2])
 
-;(fn my-pen
-;  [lst]
-;  (if (empty? (rest (rest lst)))
-;    (first lst)
-;    (my-pen (rest lst))))
 (defn penultimate [lst]
   (if (empty? (rest (rest lst)))
     (first lst)
@@ -132,7 +124,7 @@
           collection))
 (= (reverse-seq [1 2 3 4 5]) [5 4 3 2 1])
 (= (reverse-seq (sorted-set 5 7 2 7)) '(7 5 2))
-(= (reverse-seq [[1 2][3 4][5 6]]) [[5 6][3 4][1 2]])
+(= (reverse-seq [[1 2] [3 4] [5 6]]) [[5 6] [3 4] [1 2]])
 
 ;Problem 24, Sum It All Up
 ;Write a function which returns the sum of a sequence of numbers.
@@ -181,21 +173,68 @@
 ;(= (__ 8) '(1 1 2 3 5 8 13 21))
 (defn fibonacci [n]
   (cond
-  (= n 1) '(0)
-  (= n 2) '(0 1)
-  :else (reduce (fn [out _]
-                  (conj
-                    out
-                    (+
-                      (last out)
-                      (nth out
-                           (-
-                             (count out)
-                             2)))))
-                [1 1]
-                (range 0 (- n 2)))))
+    (= n 1) '(0)
+    (= n 2) '(0 1)
+    :else (reduce (fn [out _]
+                    (conj
+                      out
+                      (+
+                        (last out)
+                        (nth out
+                             (-
+                               (count out)
+                               2)))))
+                  [1 1]
+                  (range 0 (- n 2)))))
 
 (= (fibonacci 3) '(1 1 2))
 (= (fibonacci 6) '(1 1 2 3 5 8))
 (= (fibonacci 8) '(1 1 2 3 5 8 13 21))
+
+;Problem 45, Intro to Iterate
+;The iterate function can be used to produce an infinite lazy sequence.
+;(= __ (take 5 (iterate #(+ 3 %) 1)))
+(= '(1 4 7 10 13) (take 5 (iterate #(+ 3 %) 1)))
+
+;Problem 47, Contain Yourself
+;The contains? function checks if a KEY is present in a given collection.
+;(contains? #{4 5 6} __)
+;(contains? [1 1 1 1 1] __)
+;(contains? {4 :a 2 :b} __)
+;(not (contains? [1 2 4] __))
+(contains? #{4 5 6} 4)
+(contains? [1 1 1 1 1] 4)
+(contains? {4 :a 2 :b} 4)
+(not (contains? [1 2 4] 4))
+
+;Problem 48, Intro to some
+;The some function takes a predicate function and a collection. It returns the first logical true value of (predicate x) where x is an item in the collection.
+;
+;(= __ (some #{2 7 6} [5 6 7 8]))
+;(= __ (some #(when (even? %) %) [5 6 7 8]))
+(= 6 (some #{2 7 6} [5 6 7 8]))
+(= 6 (some #(when (even? %) %) [5 6 7 8]))
+
+;Problem 49, Split a sequence
+;Difficulty: easy
+;Write a function which will split a sequence into two parts.
+;
+;(= (__ 3 [1 2 3 4 5 6]) [[1 2 3] [4 5 6]])
+;(= (__ 1 [:a :b :c :d]) [[:a] [:b :c :d]])
+;(= (__ 2 [[1 2] [3 4] [5 6]]) [[[1 2] [3 4]] [[5 6]]])
+
+(defn custom-split-at [n collection]
+  (vector
+    (take n collection)
+    (drop n collection)))
+(= (custom-split-at 3 [1 2 3 4 5 6]) [[1 2 3] [4 5 6]])
+(= (custom-split-at 1 [:a :b :c :d]) [[:a] [:b :c :d]])
+(= (custom-split-at 2 [[1 2] [3 4] [5 6]]) [[[1 2] [3 4]] [[5 6]]])
+
+;Problem 51, Advanced Destructuring
+;Here is an example of some more sophisticated destructuring.
+;(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] __] [a b c d]))
+
+(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] (range 1 ż6)] [a b c d]))
+
 
