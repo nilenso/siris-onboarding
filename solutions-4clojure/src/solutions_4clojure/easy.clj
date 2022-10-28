@@ -191,6 +191,21 @@
 (= (fibonacci 6) '(1 1 2 3 5 8))
 (= (fibonacci 8) '(1 1 2 3 5 8 13 21))
 
+(defn fibonacci-simple [n]
+  (last
+    (take
+      (dec n)
+      (iterate
+        (fn [fibonacci-sequence]
+          (conj fibonacci-sequence
+                (+ (last fibonacci-sequence)
+                   (penultimate fibonacci-sequence))))
+        [1 1]))))
+
+(= (fibonacci-simple 3) '(1 1 2))
+(= (fibonacci-simple 6) '(1 1 2 3 5 8))
+(= (fibonacci-simple 8) '(1 1 2 3 5 8 13 21))
+
 ;Problem 45, Intro to Iterate
 ;The iterate function can be used to produce an infinite lazy sequence.
 ;(= __ (take 5 (iterate #(+ 3 %) 1)))
