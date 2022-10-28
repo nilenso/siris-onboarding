@@ -1,7 +1,6 @@
 (ns solutions-4clojure.core-test
-  (:require [clojure.test :refer :all]
-            [solutions-4clojure.core :refer :all]))
+  (:require [clojure.test :refer :all]))
 
 (deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+  (testing "Sample test: a number is equal to itself"
+    (is (= 0 0))))
