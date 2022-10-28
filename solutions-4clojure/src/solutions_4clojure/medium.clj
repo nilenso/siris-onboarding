@@ -100,24 +100,37 @@
 
 (custom-partition 3 (range 8))
 
-;Problem 55, Count Occurences
-;Write a function which returns a map containing the number of occurences of each distinct item in a sequence.
+;Problem 55, Count Occurrences
+;Write a function which returns a map containing the number of occurrences of each distinct item in a sequence.
 ;(= (__ [:b :a :b :a :b]) {:a 2, :b 3})
 ;(= (__ '([1 2] [1 3] [1 3])) {[1 2] 1, [1 3] 2})
 ;(= (__ [1 1 2 3 2 1 1]) {1 4, 2 2, 3 1})
 (defn custom-frequencies [collection]
   (reduce
     (fn [frequency-map element]
-      (let [count (get frequency-map element)]
-        (if (nil? count)
-          (assoc frequency-map element 1)
-          (assoc frequency-map element (+ count 1)))))
+      (if-let [cnt (get frequency-map element)]
+        (assoc frequency-map element (+ cnt 1))
+        (assoc frequency-map element 1)))
     {}
     collection))
 
 (= (custom-frequencies [:b :a :b :a :b]) {:a 2, :b 3})
 (= (custom-frequencies '([1 2] [1 3] [1 3])) {[1 2] 1, [1 3] 2})
 (= (custom-frequencies [1 1 2 3 2 1 1]) {1 4, 2 2, 3 1})
+
+(defn custom-frequencies-v2 [collection]
+  (reduce
+    (fn [frequency-map element]
+      (update
+        frequency-map
+        element
+        #(inc (or % 0))))
+    {}
+    collection))
+
+(= (custom-frequencies-v2 [:b :a :b :a :b]) {:a 2, :b 3})
+(= (custom-frequencies-v2 '([1 2] [1 3] [1 3])) {[1 2] 1, [1 3] 2})
+(= (custom-frequencies-v2 [1 1 2 3 2 1 1]) {1 4, 2 2, 3 1})
 
 (defn custom-frequencies-simple [collection]
   (reduce-kv

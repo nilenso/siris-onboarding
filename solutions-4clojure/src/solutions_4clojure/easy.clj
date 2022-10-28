@@ -227,14 +227,24 @@
   (vector
     (take n collection)
     (drop n collection)))
+
 (= (custom-split-at 3 [1 2 3 4 5 6]) [[1 2 3] [4 5 6]])
 (= (custom-split-at 1 [:a :b :c :d]) [[:a] [:b :c :d]])
 (= (custom-split-at 2 [[1 2] [3 4] [5 6]]) [[[1 2] [3 4]] [[5 6]]])
+
+(defn custom-split-at-v2 [n collection]
+  ((juxt take drop)
+   n
+   collection))
+
+(= (custom-split-at-v2 3 [1 2 3 4 5 6]) [[1 2 3] [4 5 6]])
+(= (custom-split-at-v2 1 [:a :b :c :d]) [[:a] [:b :c :d]])
+(= (custom-split-at-v2 2 [[1 2] [3 4] [5 6]]) [[[1 2] [3 4]] [[5 6]]])
 
 ;Problem 51, Advanced Destructuring
 ;Here is an example of some more sophisticated destructuring.
 ;(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] __] [a b c d]))
 
-(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] (range 1 ż6)] [a b c d]))
+(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] (range 1 6)] [a b c d]))
 
 
