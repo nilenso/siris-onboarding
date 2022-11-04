@@ -1,58 +1,56 @@
-(ns mars-rover-clj.movement
-  (:require [clojure.set :as set]))
+(ns mars-rover-clj.movement)
 
 ; X-Y Plane
-(def directions {"N" 0
-                 "E" 90
-                 "S" 180
-                 "W" 270})
-(def directions-map {"N" {:angle 0
-                          :move  (fn [x y heading] [x (inc y) heading])}
-                     "E" {:angle 90
-                          :move  (fn [x y heading] [(inc x) y heading])}
-                     "S" {:angle 180
-                          :move  (fn [x y heading] [x (dec y) heading])}
-                     "W" {:angle 270
-                          :move  (fn [x y heading] [(dec x) y heading])}})
 
-(defn turn-left
-  "Returns an angle of the compass point after turning left by the given angle."
-  [heading turn-by]
-  (-
-    ((directions-map heading) :angle)
-    turn-by))
+(def directions {"N"     {:compass-angle 0
+                          :move          (fn [rover]
+                                           [(:x rover)
+                                            (inc (:y rover))
+                                            (:heading rover)])}
+                     "E" {:compass-angle 90
+                          :move          (fn [rover]
+                                           [(inc (:x rover))
+                                            (:y rover)
+                                            (:heading rover)])}
+                     "S" {:compass-angle 180
+                          :move          (fn [rover] [(:x rover)
+                                                      (dec (:y rover))
+                                                      (:heading rover)])}
+                     "W" {:compass-angle 270
+                          :move          (fn [rover] [(dec (:x rover))
+                                                      (:y rover)
+                                                      (:heading rover)])}})
 
-(defn turn-right
-  "Returns an angle of the compass point after turning right by the given angle."
-  [heading turn-by]
-  (+
-    ((directions-map heading) :angle)
-    turn-by))
+(defn compass-angle-to-direction
+  "Returns the direction (N, E, S or W) from the compass angle"
+  [compass-angle]
+  (key (first (filter
+                #(= (:compass-angle (val %)) (mod compass-angle 360))
+                directions))))
 
-(def turn-directions {"L" (fn [heading turn-by]
-                            (turn-left heading turn-by))
-                      "R" (fn [heading turn-by]
-                            (turn-right heading turn-by))})
-
-(defn angle-to-direction
-  "Returns a compass point given the angle. North 0, East 90, South 180, West 270."
-  [angle]
-  ((set/map-invert directions)
-   (mod angle 360)))
+(defn turn-rover-heading
+  "Returns the new heading of the rover after turning it by direction-fn"
+  [direction-fn rover turn-by]
+  (update rover :heading
+          #(->> (direction-fn
+                  (:compass-angle (directions %))
+                  turn-by)
+                (compass-angle-to-direction))))
 
 ; Rover movements
 (defn move
   "Returns the new position (x and y coordinates) and the heading of the rover"
-  [x y heading]
-  ((:move (directions-map heading)) x y heading))
+  [rover]
+  ((:move (directions (:heading rover))) rover))
 
-(defn turn-90
-  "Turns the heading of the rover in the given direction"
-  [heading turn-direction]
-  (angle-to-direction
-    ((turn-directions turn-direction)
-     heading
-     90)))
+(def rover-movements
+  "A map of instruction symbols and the movement functions to move rovers"
+  {"L" (fn [rover]
+         (turn-rover-heading + rover 90))
+   "R" (fn [rover]
+         (turn-rover-heading - rover 90))
+   "M" (fn [rover]
+         (move rover))})
 
 ; I/O functions
 (defn init-rovers
@@ -65,14 +63,44 @@
    :rovers         (->> (partition 2 rover-details)
                         (map vec))})
 
+(defn move-rovers
+  "Moves rovers based on the instruction string"
+  [rover-input]
+  (->> (rover-input :rovers)
+       (map
+         (fn [[[x y heading] [movement-instructions]]]
+           (let [rover {:x       x
+                        :y       y
+                        :heading heading}]
+             (map
+               #(->>
+                  (str %)
+                  (rover-movements rover))
+               movement-instructions))))))
 
-; Testing stuff
-(move 1 2 "N")
-(turn-90 "N" "R")
-(angle-to-direction 0)
-(((directions-map "N") :move) 1 2 "N")
+
+;Testing stuff
+(move {:x       1
+       :y       2
+       :heading "N"})
+
+(((directions "N") :move) {:x           1
+                               :y       2
+                               :heading "N"})
 (->> (partition 2 [[1 2 "N"]
                    ["LMLMLMLMM"]
                    [3 3 "E"]
                    ["MMRMMRMRRM"]])
      (map vec))
+(move-rovers (init-rovers [5 5]
+                          [1 2 "N"]
+                          ["LMLMLMLMM"]
+                          [3 3 "E"]
+                          ["MMRMMRMRRM"]))
+(compass-angle-to-direction 180)
+(map str "MMRMMRMRRM")
+(turn-rover-heading + {:x       1
+                       :y       2
+                       :heading "N"} 90)
+(rover-movements "R")
+
