@@ -27,25 +27,27 @@
       (compass-angle-to-direction)))
 
 ; Rover movements
-(defn move
-  "Returns the new position (x and y coordinates) and the heading of the rover"
-  [rover]
-  ((:move-f (directions (:heading rover))) rover))
-
 (defn check-bounds
   "Returns true if the rover's position is within the plateau bounds, false otherwise"
   [plateau-bounds rover]
-  (if (and
-        (<= 0 (:x rover) (first plateau-bounds))
-        (<= 0 (:y rover) (second plateau-bounds)))
-    rover
-    nil))
+  (and
+    (<= 0 (:x rover) (first plateau-bounds))
+    (<= 0 (:y rover) (second plateau-bounds))))
+
+(defn move
+  "Returns a rover with updated position (x and y coordinates) and the heading.
+  If rover position results beyond the plateau bounds, it returns the rover unchanged."
+  [plateau-bounds rover]
+  (let [moved-rover ((:move-f (directions (:heading rover))) rover)]
+    (if (check-bounds plateau-bounds moved-rover)
+      moved-rover
+      rover)))
 
 (def rover-movements
   "A map of instruction symbols and the movement functions to move rovers"
-  {"L" (fn [rover]
+  {"L" (fn [_ rover]
          (update rover :heading #(turn-rover-heading % - 90)))
-   "R" (fn [rover]
+   "R" (fn [_ rover]
          (update rover :heading #(turn-rover-heading % + 90)))
    "M" move})
 
@@ -58,12 +60,12 @@
   [plateau-upper-right-coordinates & rover-details]
   {:plateau-bounds plateau-upper-right-coordinates
    :rovers         (->> (partition 2 rover-details)
-                     (map (fn [rover]
-                            (let [[x y heading] (first rover)]
+                     (map (fn [rover-instructions]
+                            (let [[x y heading] (first rover-instructions)]
                               [{:x       x
                                 :y       y
                                 :heading heading}
-                               (second rover)]))))})
+                               (second rover-instructions)]))))})
 
 
 (defn move-rover
@@ -72,8 +74,7 @@
   (reduce (fn [acc instruction]
             ((->>
                (str instruction)
-               (rover-movements))
-             acc))
+               (rover-movements)) plateau-bounds acc))
           rover instructions))
 
 (defn move-rovers
@@ -84,9 +85,9 @@
 
 ;Testing stuff
 
-(move {:x       1
-       :y       2
-       :heading "N"})
+(move [5 5] {:x       1
+             :y       2
+             :heading "N"})
 
 (((directions "N") :move-f) {:x       1
                              :y       2
@@ -124,11 +125,11 @@
            (str %)
            ((rover-movements) rover))
         movement-instructions))))
-(move {:x 4, :y 3, :heading "E"})
+(move [5 5] {:x 5, :y 3, :heading "E"})
 
 ((->>
    (str "M")
    (rover-movements))
- {:x 4, :y 3, :heading "E"})
+ [5 5] {:x 4, :y 3, :heading "E"})
 
 (compass-angle-to-direction 90)

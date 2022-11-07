@@ -5,15 +5,20 @@
 (deftest move-test
   (testing "Move returns the new co-ordinates and heading"
     (is (=
-          (movement/move {:x 1 :y 2 :heading "N"})
+          (movement/move [5 5] {:x 1 :y 2 :heading "N"})
           {:heading "N"
            :x       1
            :y       3}))
     (is (=
-          (movement/move {:x 1 :y 2 :heading "S"})
+          (movement/move [5 5] {:x 1 :y 2 :heading "S"})
           {:heading "S"
            :x       1
-           :y       1}))))
+           :y       1}))
+    (is (=
+          (movement/move [5 5] {:x 5 :y 2 :heading "N"})
+          {:heading "N"
+           :x       5
+           :y       2}))))
 
 (deftest check-bounds-test
   (is (= (movement/check-bounds [5 5] {:heading "N"
