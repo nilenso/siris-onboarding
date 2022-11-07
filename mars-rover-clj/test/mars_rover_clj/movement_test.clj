@@ -15,6 +15,19 @@
            :x       1
            :y       1}))))
 
+(deftest check-bounds-test
+  (is (= (movement/check-bounds [5 5] {:heading "N"
+                                       :x       3
+                                       :y       4})
+         {:heading "N"
+          :x       3
+          :y       4}))
+  (is (= (movement/check-bounds [5 5] {:heading "N"
+                                       :x       6
+                                       :y       4})
+         nil))
+  )
+
 (deftest compass-angle-to-direction-test
   (testing "Tests for the correctness of compass-angle-to-direction"
     (is (=
@@ -55,7 +68,7 @@
                                       "LMLMLMLMM"
                                       [3 3 "E"]
                                       "MMRMMRMRRM")
-                (movement/move-rovers))
+             (movement/move-rovers))
            '({:x 1, :y 3, :heading "N"} {:x 5, :y 1, :heading "E"})))))
 
 (deftest init-rovers-test
@@ -66,6 +79,6 @@
                                  [3 3 "E"]
                                  "MMRMMRMRRM")
            '{:plateau-bounds [5 5],
-            :rovers         (
-                             [{:x 1, :y 2, :heading "N"} "LMLMLMLMM"]
-                             [{:x 3, :y 3, :heading "E"} "MMRMMRMRRM"])}))))
+             :rovers         (
+                              [{:x 1, :y 2, :heading "N"} "LMLMLMLMM"]
+                              [{:x 3, :y 3, :heading "E"} "MMRMMRMRRM"])}))))
