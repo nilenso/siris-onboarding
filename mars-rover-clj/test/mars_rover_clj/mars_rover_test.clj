@@ -94,13 +94,15 @@
 
 (deftest move-rovers-sequentially-test
   (testing "move-rovers"
-    (is (= (->> (mars-rover/init-rovers [5 5]
-                                        [1 2 "N"]
-                                        "LMLMLMLMM"
-                                        [3 3 "E"]
-                                        "MMRMMRMRRM")
+    (is (= (->>
+             (mars-rover/init-rovers [5 5]
+                                     [1 2 "N"]
+                                     "LMLMLMLMM"
+                                     [3 3 "E"]
+                                     "MMRMMRMRRM")
              (mars-rover/move-rovers-sequentially))
-           '({:x 1, :y 3, :heading "N"} {:x 5, :y 1, :heading "E"})))))
+           '({:x 1, :y 3, :heading "N"}
+             {:x 5, :y 1, :heading "E"})))))
 
 (deftest init-rovers-test
   (testing "init-rovers"
@@ -111,8 +113,21 @@
                                    "MMRMMRMRRM")
            '{:plateau-bounds [5 5],
              :rovers         (
-                              {:rover        {:x 1, :y 2, :heading "N"}
-                               :instructions ["L" "M" "L" "M" "L" "M" "L" "M" "M"]}
+                              {:rover    {:x 1, :y 2, :heading "N"}
+                               :commands ["L" "M" "L" "M" "L" "M" "L" "M" "M"]}
                               {
-                               :rover        {:x 3, :y 3, :heading "E"}
-                               :instructions ["M" "M" "R" "M" "M" "R" "M" "R" "R" "M"]})}))))
+                               :rover    {:x 3, :y 3, :heading "E"}
+                               :commands ["M" "M" "R" "M" "M" "R" "M" "R" "R" "M"]})}))))
+
+(deftest parse-rover-input
+  (is (= (mars-rover/parse-rover-input '([1 2 "N"]
+                                        "LMLMLMLMM"
+                                        [3 3 "E"]
+                                        "MMRMMRMRRM"))
+         '(
+           {:rover    {:x 1, :y 2, :heading "N"}
+            :commands ["L" "M" "L" "M" "L" "M" "L" "M" "M"]}
+           {
+            :rover    {:x 3, :y 3, :heading "E"}
+            :commands ["M" "M" "R" "M" "M" "R" "M" "R" "R" "M"]})))
+  )

@@ -39,7 +39,7 @@
    rover))
 
 (def commands
-  "A map of instruction symbols and functions to move rovers."
+  "A map of command symbols and functions to move rovers."
   {"L" (fn [rover]
          (update rover :heading #(turn-heading % - 90)))
    "R" (fn [rover]
@@ -54,19 +54,34 @@
     (<= 0 (:y rover) (second plateau-bounds))))
 
 (defn move-rover
-  "Moves a rover as specified by the instructions vector."
+  "Moves a rover as specified by the commands vector."
   [rover
-   [current-instruction & next-instructions]
+   [current-command & subsequent-commands]
    plateau-bounds]
   (cond
-    (nil? current-instruction)
+    (nil? current-command)
     (if (check-bounds rover plateau-bounds)
       rover
       out-of-bounds-error)
     :else (move-rover
-            ((commands current-instruction) rover)
-            next-instructions
+            ((commands current-command) rover)
+            subsequent-commands
             plateau-bounds)))
+
+(defn parse-rover-input
+  "Takes a collection of vectors with alternate rover positions and instruction strings.
+  Returns a map of rovers' initial positions and commands."
+  [rover-input]
+  (->> (partition 2 rover-input)
+    (map (fn [[rover instructions]]
+           (let [[x y heading] rover]
+             {:rover    {:x       x
+                             :y       y
+                             :heading heading}
+              :commands (->>
+                              instructions
+                              (map str)
+                              (vec))})))))
 
 (defn init-rovers
   "Takes an input for the Mars Rover problem
@@ -74,18 +89,10 @@
   infinite sequence of rover's initial position
   and a string of a series of instructions.
   Returns a map of plateau bounds and rovers."
-  [plateau-upper-right-coordinates & rover-details]
+  [plateau-upper-right-coordinates & rover-input]
   {:plateau-bounds plateau-upper-right-coordinates
-   :rovers         (->> (partition 2 rover-details)
-                     (map (fn [[rover instructions]]
-                            (let [[x y heading] rover]
-                              {:rover        {:x       x
-                                              :y       y
-                                              :heading heading}
-                               :instructions (->>
-                                               instructions
-                                               (map str)
-                                               (vec))}))))})
+   :rovers         (parse-rover-input rover-input)})
+
 (comment
   (= (init-rovers [5 5]
                   "LMLMLMLMM"
@@ -94,18 +101,18 @@
                   "MMRMMRMRRM")
      '{:plateau-bounds [5 5],
        :rovers         (
-                        {:rover        {:x 1, :y 2, :heading "N"}
-                         :instructions ["L" "M" "L" "M" "L" "M" "L" "M" "M"]}
+                        {:rover    {:x 1, :y 2, :heading "N"}
+                         :commands ["L" "M" "L" "M" "L" "M" "L" "M" "M"]}
                         {
-                         :rover        {:x 3, :y 3, :heading "E"}
-                         :instructions ["M" "M" "R" "M" "M" "R" "M" "R" "R" "M"]})}))
+                         :rover    {:x 3, :y 3, :heading "E"}
+                         :commands ["M" "M" "R" "M" "M" "R" "M" "R" "R" "M"]})}))
 
 (defn move-rovers-sequentially
-  "Moves rovers based on the instruction string."
+  "Returns positions of rovers after moving them sequentially."
   [{:keys [plateau-bounds rovers]}]
   (map #(move-rover
           (:rover %)
-          (:instructions %)
+          (:commands %)
           plateau-bounds)
        rovers))
 
