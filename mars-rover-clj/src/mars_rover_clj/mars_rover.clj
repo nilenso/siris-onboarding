@@ -33,10 +33,11 @@
 (defn move
   "Returns a rover with updated position (x and y coordinates) and the heading."
   [rover]
-  ((:move-f (->
-              (:heading rover)
-              (directions)))
-   rover))
+  (if-let [move-fn (:move-f (->
+                              (:heading rover)
+                              (directions)))]
+    (move-fn rover)
+    nil))
 
 (def commands
   "A map of command symbols and functions to move rovers."
@@ -76,12 +77,12 @@
     (map (fn [[rover instructions]]
            (let [[x y heading] rover]
              {:rover    {:x       x
-                             :y       y
-                             :heading heading}
+                         :y       y
+                         :heading heading}
               :commands (->>
-                              instructions
-                              (map str)
-                              (vec))})))))
+                          instructions
+                          (map str)
+                          (vec))})))))
 
 (defn init-rovers
   "Takes an input for the Mars Rover problem

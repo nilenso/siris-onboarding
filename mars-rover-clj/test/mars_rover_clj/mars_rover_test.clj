@@ -18,7 +18,10 @@
           (mars-rover/move {:x 5 :y 2 :heading "E"})
           {:heading "E"
            :x       6
-           :y       2}))))
+           :y       2}))
+    (is (=
+          (mars-rover/move {:x 5 :y 2 :heading "X"})
+          nil))))
 
 (deftest check-bounds-test
   (is (= (mars-rover/check-bounds {:heading "N"
@@ -46,7 +49,10 @@
           "S"))
     (is (=
           (mars-rover/compass-angle-to-direction 270)
-          "W"))))
+          "W"))
+    (is (=
+          (mars-rover/compass-angle-to-direction 45)
+          nil))))
 
 (deftest turn-rover-heading-test
   (testing "Tests for the correctness of turn-rover-heading"
@@ -64,7 +70,10 @@
           "S"))
     (is (=
           (mars-rover/turn-heading "S" - 90)
-          "E"))))
+          "E"))
+    (is (=
+          (mars-rover/turn-heading "S" - 20)
+          nil))))
 
 (deftest move-rover-test
   (testing "Correctness of move-rover"
