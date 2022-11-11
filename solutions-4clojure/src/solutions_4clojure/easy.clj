@@ -191,6 +191,21 @@
 (= (fibonacci 6) '(1 1 2 3 5 8))
 (= (fibonacci 8) '(1 1 2 3 5 8 13 21))
 
+(defn fibonacci-simple [n]
+  (last
+    (take
+      (dec n)
+      (iterate
+        (fn [fibonacci-sequence]
+          (conj fibonacci-sequence
+                (+ (last fibonacci-sequence)
+                   (penultimate fibonacci-sequence))))
+        [1 1]))))
+
+(= (fibonacci-simple 3) '(1 1 2))
+(= (fibonacci-simple 6) '(1 1 2 3 5 8))
+(= (fibonacci-simple 8) '(1 1 2 3 5 8 13 21))
+
 ;Problem 45, Intro to Iterate
 ;The iterate function can be used to produce an infinite lazy sequence.
 ;(= __ (take 5 (iterate #(+ 3 %) 1)))
@@ -227,14 +242,24 @@
   (vector
     (take n collection)
     (drop n collection)))
+
 (= (custom-split-at 3 [1 2 3 4 5 6]) [[1 2 3] [4 5 6]])
 (= (custom-split-at 1 [:a :b :c :d]) [[:a] [:b :c :d]])
 (= (custom-split-at 2 [[1 2] [3 4] [5 6]]) [[[1 2] [3 4]] [[5 6]]])
+
+(defn custom-split-at-v2 [n collection]
+  ((juxt take drop)
+   n
+   collection))
+
+(= (custom-split-at-v2 3 [1 2 3 4 5 6]) [[1 2 3] [4 5 6]])
+(= (custom-split-at-v2 1 [:a :b :c :d]) [[:a] [:b :c :d]])
+(= (custom-split-at-v2 2 [[1 2] [3 4] [5 6]]) [[[1 2] [3 4]] [[5 6]]])
 
 ;Problem 51, Advanced Destructuring
 ;Here is an example of some more sophisticated destructuring.
 ;(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] __] [a b c d]))
 
-(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] (range 1 ż6)] [a b c d]))
+(= [1 2 [3 4 5] [1 2 3 4 5]] (let [[a b & c :as d] (range 1 6)] [a b c d]))
 
 
