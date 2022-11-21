@@ -109,3 +109,11 @@ and `discarded` updated to true where die value matches `n`)
         2. roll the dice
         3. if `:set-selector` is not nil, call set-selector function
         4. if `:set-operator` is not nil, pass the result of set-selector to set-operator
+
+### TODO
+
+1. Test rerolls deterministically
+2. Make keep, drop and reroll variadic
+3. Consider making computing numeric value of dice a function
+4. Make set operator and selector function support sets and literal sets
+5. Consider breaking down `keep`, `drop` and `reroll` to smaller functions
