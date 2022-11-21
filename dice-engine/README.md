@@ -33,17 +33,25 @@ problem in Clojure.
 
 **Dice-roll notation:** `NdX`
 
+**Die map representation**
+
+```clojure
+(def die {:value           1
+          :discarded       false
+          :faces           3
+          :previous-values [2 2]})
+```
+
 **Dice-roll map representation -**
 
 `3d4`
 
 ```clojure
-(def dice-roll {:numeric_value  8
-                :set            #{4 3 1}
-                :discarded_dice #{}})
+(def dice-roll {:numeric-value 8
+                :dice          [d1 d2 d3]})  ; d1, d2 and d3 are die maps of face value 4, 3 & 1
 ``` 
 
-**Dice expression map representation**
+**Dice-expression map representation**
 
 `3d4kh2`
 
@@ -60,45 +68,44 @@ _Parse dice expression_
 
 _Dice roll_
 
-- `rand(n)`
-- `roll(n, number_of_faces)`
-  - Returns a dice-roll map after calling rand(number_of_faces) n times 
+- `rand [n]`
+- `roll [n, faces]`
+    - Returns a dice-roll map after calling `rand [faces]` n times
 
 **Pure functions -**
 
 _Set operations_
 
-- `keep(dice-roll & n)`
-    - Returns a new dice-roll map with `:numeric_value` updated \
-      and discarded dice moved from `:set` to `:discarded_dice`
-- `drop(dice-roll & n)`
-    - Returns a new dice-roll map with `:numeric_value` updated \
-      and discarded dice moved from `:set` to `:discarded_dice`
-- `reroll(dice-roll & n)`
+- `keep [dice-roll n]`
+    - Returns a new dice-roll map with `:numeric-value` updated \
+      and `discarded` updated to true where die value does not match `n`.
+- `drop [dice-roll n]`
+    - Returns a new dice-roll map with `:numeric-value` updated \
+      and `discarded` updated to true where die value matches `n`.
+- `reroll [dice-roll n]`
     - Returns a new dice-roll map if none of the rerolled dice match `n`,\
-      otherwise recurses until none match. Discarded dice are \
-      moved from `:set` to `:discarded_dice`
+      otherwise recurses until none match. `previous-values` are updated for each dice \
+      on every roll.
 
 _Set selectors_
 
-(Return a new dice-roll map with `:numeric_value` updated \
-and discarded dice moved from `:set` to `:discarded_dice`)
+(Return a new dice-roll map with `:numeric-value` updated \
+and `discarded` updated to true where die value matches `n`)
 
-- highest(x, dice-roll)
-- lowest(x, dice-roll)
-- greater-than(x, dice-roll)
-- less-than(x, dice-roll)
+- `highest [x, dice]`
+- `lowest [x, dice]`
+- `greater-than [x, dice]`
+- `less-than [x, dice]`
 
 **Imperative shell -**
 
-1. `parse_input`
+1. `parse-input`
     - represent the input expression as a tree
         - numeric operators (`+`/`-`/`*`/`/`) are parent nodes
         - child nodes can either be a `dice-roll` map or a number
 2. Solve the expressions bottom-up
-   - Order of execution
-       1. parse dice expression - `parse-dice-expression`
-       2. roll the dice
-       3. if `:set-selector` is not nil, call set-selector function
-       4. if `:set-operator` is not nil, pass the result of set-selector to set-operator
-
+    - Order of execution
+        1. parse dice expression - `parse-dice-expression`
+        2. roll the dice
+        3. if `:set-selector` is not nil, call set-selector function
+        4. if `:set-operator` is not nil, pass the result of set-selector to set-operator
