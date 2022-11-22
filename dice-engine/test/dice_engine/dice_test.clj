@@ -4,21 +4,21 @@
 
 (deftest drop-test
   (testing "should mark the dice that match the exact value as discarded and update :numeric-value"
-    (is (= (dice/drop {:numeric-value 8
-                       :dice          [
-                                       {:value           1
-                                        :discarded       false
-                                        :faces           4
-                                        :previous-values []}
-                                       {:value           3
-                                        :discarded       false
-                                        :faces           4
-                                        :previous-values []}
-                                       {:value           4
-                                        :discarded       false
-                                        :faces           4
-                                        :previous-values []}]}
-                      3)
+    (is (= (dice/d {:numeric-value 8
+                    :dice          [
+                                    {:value           1
+                                     :discarded       false
+                                     :faces           4
+                                     :previous-values []}
+                                    {:value           3
+                                     :discarded       false
+                                     :faces           4
+                                     :previous-values []}
+                                    {:value           4
+                                     :discarded       false
+                                     :faces           4
+                                     :previous-values []}]}
+                   3)
            '{:numeric-value 5
              :dice          [[
                               {:value           1
@@ -35,12 +35,12 @@
                                :previous-values []}]]})))
 
   (testing "should return the dice-roll map unchanged if none of the dice value match."
-    (is (= (dice/drop {:numeric-value 2
-                       :dice          [{:value           2
-                                        :discarded       false
-                                        :faces           2
-                                        :previous-values []}]}
-                      1)
+    (is (= (dice/d {:numeric-value 2
+                    :dice          [{:value           2
+                                     :discarded       false
+                                     :faces           2
+                                     :previous-values []}]}
+                   1)
            '{:numeric-value 2
              :dice          [{:value           2
                               :discarded       false
@@ -51,21 +51,21 @@
 
 (deftest keep-test
   (testing "should mark the dice that do not match as discarded and update :numeric-value"
-    (is (= (dice/keep {:numeric-value 8
-                       :dice          [
-                                       {:value           1
-                                        :discarded       false
-                                        :faces           4
-                                        :previous-values []}
-                                       {:value           3
-                                        :discarded       false
-                                        :faces           4
-                                        :previous-values []}
-                                       {:value           4
-                                        :discarded       false
-                                        :faces           4
-                                        :previous-values []}]}
-                      4)
+    (is (= (dice/k {:numeric-value 8
+                    :dice          [
+                                    {:value           1
+                                     :discarded       false
+                                     :faces           4
+                                     :previous-values []}
+                                    {:value           3
+                                     :discarded       false
+                                     :faces           4
+                                     :previous-values []}
+                                    {:value           4
+                                     :discarded       false
+                                     :faces           4
+                                     :previous-values []}]}
+                   4)
            '{:numeric-value 4
              :dice          [
                              {:value           1
@@ -81,20 +81,20 @@
                               :faces           4
                               :previous-values []}]})))
   (testing "should return mark all dice as discarded and update :numeric-value to 0 if none match"
-    (is (= dice/keep {:numeric-value 8
-                      :dice          [
-                                      {:value           1
-                                       :discarded       false
-                                       :faces           4
-                                       :previous-values []}
-                                      {:value           3
-                                       :discarded       false
-                                       :faces           4
-                                       :previous-values []}
-                                      {:value           4
-                                       :discarded       false
-                                       :faces           4
-                                       :previous-values []}]}
+    (is (= dice/k {:numeric-value 8
+                   :dice          [
+                                   {:value           1
+                                    :discarded       false
+                                    :faces           4
+                                    :previous-values []}
+                                   {:value           3
+                                    :discarded       false
+                                    :faces           4
+                                    :previous-values []}
+                                   {:value           4
+                                    :discarded       false
+                                    :faces           4
+                                    :previous-values []}]}
            2)
         '{:numeric-value 0
           :dice          [
@@ -180,4 +180,21 @@
                          2)
          [1]))
   )
+
+(deftest equal-test
+  (is (= (dice/match [
+                      {:value           1
+                       :discarded       false
+                       :faces           4
+                       :previous-values []}
+                      {:value           3
+                       :discarded       false
+                       :faces           4
+                       :previous-values []}
+                      {:value           4
+                       :discarded       false
+                       :faces           4
+                       :previous-values []}]
+                     4)
+         [4])))
 
