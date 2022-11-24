@@ -36,34 +36,24 @@
   "Applies the selector on :dice with n. Returns a new map with :numeric-value updated
   after discarding the dice that match the result of the selector."
   [dice selector n]
-  (let [dice-subset (selector dice n)]
-    (reduce
-      (fn [acc die]
-        (if (some
-              #{(:value die)}
-              dice-subset)
-          (->>
-            (assoc die :discarded true)
-            (conj acc))
-          (conj acc die)))
-      []
-      dice)))
+  (let [filtered-dice (selector dice n)]
+    (map #(if (some
+                #{(:value %)}
+                filtered-dice)
+            (assoc % :discarded true)
+            %)
+         dice)))
 
 (defn pick
   "Returns a new map with :numeric-value updated after discarding the dice that do not match n."
   [dice selector n]
-  (let [dice-subset (selector dice n)]
-    (reduce
-      (fn [acc die]
-        (if-not (some
-                  #{(:value die)}
-                  dice-subset)
-          (->>
-            (assoc die :discarded true)
-            (conj acc))
-          (conj acc die)))
-      []
-      dice)))
+  (let [filtered-dice (selector dice n)]
+    (map #(if-not (some
+                    #{(:value %)}
+                    filtered-dice)
+            (assoc % :discarded true)
+            %)
+         dice)))
 
 (defn reroll
   "Returns a new dice-roll map if none of the rerolled dice match n,
