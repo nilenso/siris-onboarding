@@ -25,15 +25,19 @@
     (reduce +)))
 
 (defn roll
-  "Returns a dice-roll map after calling rand [faces] n times"
+  "Returns n dice, each with a value <= faces"
   [n faces]
-  (->> (repeatedly
-         n
-         #(rand-int-natural faces))
+  (->> (repeatedly n #(rand-int-natural faces))
     (map #(create-die % faces))))
 
+(defn reroll
+  "Rerolls a die"
+  [{:keys [value faces previous-values] :as die}]
+  (assoc die :value (rand-int-natural faces)
+             :previous-values (conj previous-values value)))
+
 (defn discard
-  "Applies the selector on :dice with n. Returns a new map with :numeric-value updated
+  "Applies the selector on dice with n. Returns a new map
   after discarding the dice that match the result of the selector."
   [dice selector n]
   (let [filtered-dice (selector dice n)]
@@ -45,7 +49,7 @@
          dice)))
 
 (defn pick
-  "Returns a new map with :numeric-value updated after discarding the dice that do not match n."
+  "Returns a new map after discarding the dice that do not match n."
   [dice selector n]
   (let [filtered-dice (selector dice n)]
     (map #(if-not (some
@@ -55,13 +59,25 @@
             %)
          dice)))
 
-(defn reroll
+(defn reroll-matched
   "Returns a new dice-roll map if none of the rerolled dice match n,
   otherwise recurses until none match. History of each die value is appended to
   :previous-values of the die map."
-  [dice-roll selector n]
+  [dice selector n]
   ;TODO
-  )
+  ; 1. filter
+  ; 2. reroll filtered dice
+  (let [filtered-dice (selector dice n)]
+    (if (empty? filtered-dice)
+      dice
+      (recur (map #(if (some
+                         #{(:value %)}
+                         filtered-dice)
+                     (reroll %)
+                     %)
+                  dice)
+             selector
+             n))))
 
 (defn highest
   "Returns a vector of integer values of the highest n dice.
