@@ -13,8 +13,6 @@
   [n]
   (+ 1 (rand-int n)))
 
-(defn seq-contains? [coll target] (some #(= target %) coll))
-
 (defn create-die
   "Returns a die map of the form
   {:value           n
@@ -65,25 +63,14 @@
   [dice selector n]
   (selector dice n))
 
-(defn select
-  "Selects dice based on the predicate"
-  [pred dice]
-  (filter pred dice))
-
 (defn reroll-matched
-  "Returns a new dice-roll map if none of the rerolled dice match n,
-  otherwise recurses until none match. History of each die value is appended to
-  :previous-values of the die map."
+  "Rerolls dice filtered by selector and returns the rerolled dice.
+   Rerolls until none of the dice can be filtered by selector."
   [dice selector n]
   (let [filtered-dice (selector dice n)]
     (if (empty? filtered-dice)
       dice
-      (recur (map #(if (some
-                         #{(:value %)}
-                         filtered-dice)
-                     (reroll %)
-                     %)
-                  dice)
+      (recur (reroll filtered-dice)
              selector
              n))))
 
