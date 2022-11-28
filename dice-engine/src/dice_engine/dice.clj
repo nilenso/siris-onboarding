@@ -1,9 +1,19 @@
-(ns dice-engine.dice)
+(ns dice-engine.dice
+  (:refer-clojure :exclude [drop keep]))
+
+(def id-counter (atom -1))
+
+(defn get-id
+  "Returns an auto incremented id"
+  []
+  (swap! id-counter inc))
 
 (defn rand-int-natural
   "Returns a random integer between 1 to n (both inclusive)."
   [n]
   (+ 1 (rand-int n)))
+
+(defn seq-contains? [coll target] (some #(= target %) coll))
 
 (defn create-die
   "Returns a die map of the form
@@ -12,10 +22,10 @@
    :faces           x
    :previous-values []}"
   [die-value faces]
-  (into {:value           die-value
-         :discarded       false
-         :faces           faces
-         :previous-values []}))
+  {:id              (get-id)
+   :value           die-value
+   :faces           faces
+   :previous-values []})
 
 (defn sum
   "Takes a list of die maps and returns the sum of the numeric values as an integer."
@@ -36,37 +46,35 @@
   (assoc die :value (rand-int-natural faces)
              :previous-values (conj previous-values value)))
 
-(defn discard
+(defn drop
   "Applies the selector on dice with n. Returns a new map
   after discarding the dice that match the result of the selector."
   [dice selector n]
-  (let [filtered-dice (selector dice n)]
-    (map #(if (some
-                #{(:value %)}
-                filtered-dice)
-            (assoc % :discarded true)
-            %)
-         dice)))
+  (let [filtered-ids (->>
+                       (selector dice n)
+                       (map :id))]
+    (filter (fn [die] (->
+                        (some
+                          #(= (:id die) %)
+                          filtered-ids)
+                        (not)))
+            dice)))
 
-(defn pick
+(defn keep
   "Returns a new map after discarding the dice that do not match n."
   [dice selector n]
-  (let [filtered-dice (selector dice n)]
-    (map #(if-not (some
-                    #{(:value %)}
-                    filtered-dice)
-            (assoc % :discarded true)
-            %)
-         dice)))
+  (selector dice n))
+
+(defn select
+  "Selects dice based on the predicate"
+  [pred dice]
+  (filter pred dice))
 
 (defn reroll-matched
   "Returns a new dice-roll map if none of the rerolled dice match n,
   otherwise recurses until none match. History of each die value is appended to
   :previous-values of the die map."
   [dice selector n]
-  ;TODO
-  ; 1. filter
-  ; 2. reroll filtered dice
   (let [filtered-dice (selector dice n)]
     (if (empty? filtered-dice)
       dice
@@ -84,8 +92,8 @@
   If the size of input dice vector (k) is less than n, returns the highest k dice."
   [dice n]
   (->>
-    (map :value dice)
-    (sort >)
+    dice
+    (sort-by :value >)
     (take n)))
 
 (defn lowest
@@ -93,27 +101,33 @@
   If the size of input dice vector (k) is less than n, returns the lowest k dice."
   [dice n]
   (->>
-    (map :value dice)
-    (sort)
+    dice
+    (sort-by :value)
     (take n)))
 
 (defn greater-than
   "Returns a vector of integers of value > n. Empty vector if none qualify."
   [dice n]
-  (->>
-    (map :value dice)
-    (filter #(> % n))))
+  (filter
+    #(->
+       (:value %)
+       (> n))
+    dice))
 
 (defn less-than
   "Returns a vector of integers of value > n. Empty vector if none qualify."
   [dice n]
-  (->>
-    (map :value dice)
-    (filter #(< % n))))
+  (filter
+    #(->
+       (:value %)
+       (< n))
+    dice))
 
 (defn match
   "Returns a vector of integers of value = n. Empty vector if none match."
   [dice n]
-  (->>
-    (map :value dice)
-    (filter #(= n %))))
+  (filter
+    #(->
+       (:value %)
+       (= n))
+    dice))
