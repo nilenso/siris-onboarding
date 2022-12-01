@@ -15,8 +15,8 @@
 
 (defn create-die
   "Returns a die map of the form
-  {:value           n
-   :discarded       false
+  {:id              (get-id)
+   :value           n
    :faces           x
    :previous-values []}"
   [die-value faces]
@@ -101,7 +101,7 @@
        (> n))
     dice))
 
-(defn less-than
+(defn lesser-than
   "Returns a vector of integers of value > n. Empty vector if none qualify."
   [dice n]
   (filter
