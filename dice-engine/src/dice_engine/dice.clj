@@ -35,7 +35,8 @@
 (defn roll
   "Returns n dice, each with a value <= faces"
   [n faces]
-  (->> (repeatedly n #(rand-int-natural faces))
+  (->>
+    (repeatedly n #(rand-int-natural faces))
     (map #(create-die % faces))))
 
 (defn reroll
@@ -47,9 +48,9 @@
 (defn drop
   "Applies the selector on dice with n. Returns a new map
   after discarding the dice that match the result of the selector."
-  [dice selector n]
+  [dice n selector]
   (let [filtered-ids (->>
-                       (selector dice n)
+                       (selector n dice)
                        (map :id))]
     (filter (fn [die] (->
                         (some
@@ -60,24 +61,33 @@
 
 (defn keep
   "Returns a new map after discarding the dice that do not match n."
-  [dice selector n]
-  (selector dice n))
+  [dice n selector]
+  (selector n dice))
 
 (defn reroll-matched
   "Rerolls dice filtered by selector and returns the rerolled dice.
    Rerolls until none of the dice can be filtered by selector."
-  [dice selector n]
-  (let [filtered-dice (selector dice n)]
-    (if (empty? filtered-dice)
+  [dice n selector]
+  (let [filtered-ids (->>
+                       (selector n dice)
+                       (map :id))]
+    (if (empty? filtered-ids)
       dice
-      (recur (reroll filtered-dice)
-             selector
-             n))))
+      (recur (map
+               (fn [die]
+                 (if (some
+                       #(= (:id die) %)
+                       filtered-ids)
+                   (reroll die)
+                   die))
+               dice)
+             n
+             selector))))
 
 (defn highest
   "Returns a vector of integer values of the highest n dice.
   If the size of input dice vector (k) is less than n, returns the highest k dice."
-  [dice n]
+  [n dice]
   (->>
     dice
     (sort-by :value >)
@@ -86,7 +96,7 @@
 (defn lowest
   "Returns a vector of integer values of the lowest n dice.
   If the size of input dice vector (k) is less than n, returns the lowest k dice."
-  [dice n]
+  [n dice]
   (->>
     dice
     (sort-by :value)
@@ -94,7 +104,7 @@
 
 (defn greater-than
   "Returns a vector of integers of value > n. Empty vector if none qualify."
-  [dice n]
+  [n dice]
   (filter
     #(->
        (:value %)
@@ -103,7 +113,7 @@
 
 (defn lesser-than
   "Returns a vector of integers of value > n. Empty vector if none qualify."
-  [dice n]
+  [n dice]
   (filter
     #(->
        (:value %)
@@ -112,9 +122,10 @@
 
 (defn match
   "Returns a vector of integers of value = n. Empty vector if none match."
-  [dice n]
+  [n dice]
   (filter
     #(->
        (:value %)
        (= n))
     dice))
+

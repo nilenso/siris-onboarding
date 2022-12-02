@@ -41,7 +41,6 @@
 
 (defn parse-output
   [{:keys [outcomes]}]
-  "(val1, ~discarded_val2~, val3 (~previousrollval3~, ~previousrollval3'~))"
   (str "("
        (->> (map #(parse-output %) outcomes)
          (string/join ", "))
@@ -56,12 +55,16 @@
         roll-values (dice/roll
                       (:number-of-dice roll)
                       (:faces roll))
-        result (operator roll-values selector literal)]
+        result (operator roll-values literal selector)]
+    (prn roll-values)
     (map
       (fn [{:keys [id] :as die}]
-        (let [result-die (filter #(= (:id %) id) result)]
-          (assoc die :discarded (empty? result-die)
-                     :previous-values (:previous-values result-die))))
+        (if-let [{:keys [value previous-values] :as result-die}
+                    (->> result
+                   (filter #(= (:id %) id))
+                   (first))]
+          (assoc result-die :discarded false)
+          (assoc die :discarded true)))
       roll-values)))
 
 (def dice-roll {:r1 {:expression    "2d6kh1"
@@ -75,13 +78,13 @@
                                      :faces          20}
                      :set-operation {:operator :reroll
                                      :selector :match
-                                     :literal  1}}})
-
+                                     :literal  8}}})
 
 
 (+ (roll-value (evaluate-roll (:r1 dice-roll)))
    (- (roll-value (evaluate-roll (:r2 dice-roll)))
       (* 3 4)))
+(evaluate-roll (:r2 dice-roll))
 
 (defn print-output
   "Takes a map of dice rolls and prints the result of each dice set operation and the operations"
