@@ -33,10 +33,10 @@
     (reduce +)))
 
 (defn roll
-  "Returns n dice, each with a value <= faces"
-  [n faces]
+  "Returns literal dice, each with a value <= faces"
+  [literal faces]
   (->>
-    (repeatedly n #(rand-int-natural faces))
+    (repeatedly literal #(rand-int-natural faces))
     (map #(create-die % faces))))
 
 (defn reroll
@@ -46,86 +46,71 @@
              :previous-values (conj previous-values value)))
 
 (defn drop
-  "Applies the selector on dice with n. Returns a new map
+  "Applies the selector on dice with literal. Returns a new map
   after discarding the dice that match the result of the selector."
-  [dice n selector]
-  (let [filtered-ids (->>
-                       (selector n dice)
-                       (map :id))]
-    (filter (fn [die] (->
-                        (some
-                          #(= (:id die) %)
-                          filtered-ids)
-                        (not)))
-            dice)))
+  [dice literal selector]
+  (filter
+    (complement
+      (partial selector literal))
+    dice))
 
 (defn keep
-  "Returns a new map after discarding the dice that do not match n."
-  [dice n selector]
-  (selector n dice))
+  "Returns a new map after discarding the dice that do not match literal."
+  [dice literal selector]
+  (filter
+    (partial selector literal)
+    dice))
 
 (defn reroll-matched
   "Rerolls dice filtered by selector and returns the rerolled dice.
    Rerolls until none of the dice can be filtered by selector."
-  [dice n selector]
-  (let [filtered-ids (->>
-                       (selector n dice)
-                       (map :id))]
-    (if (empty? filtered-ids)
+  [dice literal selector]
+  (prn dice)
+  (let [grouped-dice (group-by (partial selector literal) dice)
+        matched-dice (get grouped-dice true)
+        rest-dice (get grouped-dice false)]
+    (if (empty? matched-dice)
       dice
-      (recur (map
-               (fn [die]
-                 (if (some
-                       #(= (:id die) %)
-                       filtered-ids)
-                   (reroll die)
-                   die))
-               dice)
-             n
+      (recur (concat (map reroll matched-dice)
+                     rest-dice)
+             literal
              selector))))
 
 (defn highest
-  "Returns a vector of integer values of the highest n dice.
-  If the size of input dice vector (k) is less than n, returns the highest k dice."
-  [n dice]
+  "Returns a vector of integer values of the highest literal dice.
+  If the size of input dice vector (k) is less than literal, returns the highest k dice."
+  [literal dice]
   (->>
     dice
     (sort-by :value >)
-    (take n)))
+    (take literal)))
 
 (defn lowest
-  "Returns a vector of integer values of the lowest n dice.
-  If the size of input dice vector (k) is less than n, returns the lowest k dice."
-  [n dice]
+  "Returns a vector of integer values of the lowest literal dice.
+  If the size of input dice vector (k) is less than literal, returns the lowest k dice."
+  [literal dice]
   (->>
     dice
     (sort-by :value)
-    (take n)))
+    (take literal)))
 
 (defn greater-than
-  "Returns a vector of integers of value > n. Empty vector if none qualify."
-  [n dice]
-  (filter
-    #(->
-       (:value %)
-       (> n))
-    dice))
+  "Returns a vector of integers of value > literal. Empty vector if none qualify."
+  [literal die]
+  (->
+    (:value die)
+    (> literal)))
 
 (defn lesser-than
-  "Returns a vector of integers of value > n. Empty vector if none qualify."
-  [n dice]
-  (filter
-    #(->
-       (:value %)
-       (< n))
-    dice))
+  "Returns a vector of integers of value > literal. Empty vector if none qualify."
+  [literal die]
+  (->
+    (:value die)
+    (< literal)))
 
 (defn match
-  "Returns a vector of integers of value = n. Empty vector if none match."
-  [n dice]
-  (filter
-    #(->
-       (:value %)
-       (= n))
-    dice))
-
+  "Returns a vector of integers of value = literal. Empty vector if none match."
+  [literal die]
+  (->
+    (:value die)
+    (= literal)))

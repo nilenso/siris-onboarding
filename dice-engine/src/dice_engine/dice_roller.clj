@@ -56,7 +56,7 @@
                       (:number-of-dice roll)
                       (:faces roll))
         result (operator roll-values literal selector)]
-    (prn roll-values)
+    ;(prn roll-values)
     (map
       (fn [{:keys [id] :as die}]
         (if-let [result-die
@@ -70,15 +70,15 @@
 (def dice-roll {:r1 {:expression    "2d6kh1"
                      :roll          {:number-of-dice 2
                                      :faces          6}
-                     :set-operation {:operator :keep
-                                     :selector :highest
-                                     :literal  1}}
+                     :set-operation {:operator :drop
+                                     :selector :greater-than
+                                     :literal  2}}
                 :r2 {:expression    "3d20rr1"
                      :roll          {:number-of-dice 3
                                      :faces          20}
                      :set-operation {:operator :reroll
-                                     :selector :match
-                                     :literal  8}}})
+                                     :selector :greater-than
+                                     :literal  7}}})
 
 (defn print-output
   "Takes a map of dice rolls and prints the result of each dice set operation and the operations"
@@ -88,14 +88,20 @@
                    dice-roll)]
     rolls))
 
-
-
-; Tests
 (def dice-roll-1 {:roll          {:number-of-dice 2
                                   :faces          6}
                   :set-operation {:operator :keep
                                   :selector :highest
                                   :literal  1}})
+
+(evaluate-roll (:r2 dice-roll))
+
+
+
+; Tests
+(dice/reroll-matched [{:id 6, :value 7, :faces 20, :previous-values [], :discarded true}
+                      {:id 7, :value 16, :faces 20, :previous-values [], :discarded true}
+                      {:id 8, :value 4, :faces 20, :previous-values [], :discarded true}] 3 dice/greater-than)
 
 (def dice-roll-1-intermediate {:roll          {:number-of-dice 2
                                                :faces          6}
@@ -118,3 +124,5 @@
                                   :literal  2}})
 
 (def numerals-1 2)
+
+;(dice/keep dice/greater-than  )
