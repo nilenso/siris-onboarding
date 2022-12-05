@@ -48,8 +48,8 @@
 
 (defn evaluate-roll
   "docstring"
-  [{:keys                                                 [roll]
-    {:keys [operator selector literal] :as set-operation} :set-operation}]
+  [{:keys                               [roll]
+    {:keys [operator selector literal]} :set-operation}]
   (let [operator (operator dice-operators)
         selector (selector dice-selectors)
         roll-values (dice/roll
@@ -59,8 +59,8 @@
     (prn roll-values)
     (map
       (fn [{:keys [id] :as die}]
-        (if-let [{:keys [value previous-values] :as result-die}
-                    (->> result
+        (if-let [result-die
+                 (->> result
                    (filter #(= (:id %) id))
                    (first))]
           (assoc result-die :discarded false)
@@ -80,11 +80,6 @@
                                      :selector :match
                                      :literal  8}}})
 
-
-(+ (roll-value (evaluate-roll (:r1 dice-roll)))
-   (- (roll-value (evaluate-roll (:r2 dice-roll)))
-      (* 3 4)))
-
 (defn print-output
   "Takes a map of dice rolls and prints the result of each dice set operation and the operations"
   [dice-roll operations]
@@ -93,6 +88,9 @@
                    dice-roll)]
     rolls))
 
+
+
+; Tests
 (def dice-roll-1 {:roll          {:number-of-dice 2
                                   :faces          6}
                   :set-operation {:operator :keep
@@ -120,34 +118,3 @@
                                   :literal  2}})
 
 (def numerals-1 2)
-
-; + - * /
-
-;(def die-1 {:id              3
-;            :value           die-value
-;            :faces           faces
-;            :previous-values []})
-
-; (val1, ~discarded_val2~, val3 (~previousrollval3~, ~previousrollval3'~))
-
-(defn parse []
-  {:outcome       [{:id              3
-                    :value           59
-                    :faces           60
-                    :previous-values []}
-                   {:id              4
-                    :value           49
-                    :faces           50
-                    :previous-values []}]
-   :final-state   [{:id              3
-                    :value           59
-                    :faces           60
-                    :previous-values []}]
-   :set-operation {:operator :drop
-                   :selector :lowest
-                   :literal  1}})
-
-
-;(* (roll-value (evaluate-roll dice-roll-1))
-;   (+ (roll-value (evaluate-roll dice-roll-2))
-;      (numerals-1)))
