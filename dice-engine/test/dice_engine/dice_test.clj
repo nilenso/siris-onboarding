@@ -155,7 +155,7 @@
   )
 
 (deftest less-than-test
-  (is (= (dice/less-than [
+  (is (= (dice/lesser-than [
                           {:value           1
                            :discarded       false
                            :faces           4
@@ -168,7 +168,7 @@
                            :discarded       false
                            :faces           4
                            :previous-values []}]
-                         2)
+                           2)
          [1]))
   )
 

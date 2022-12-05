@@ -18,7 +18,7 @@
                      :match        dice/match})
 
 (defn roll-value
-  [{:keys [outcomes]}]
+  [outcomes]
   (->>
     (filter #(not (:discarded %)) outcomes)
     (map :value)
@@ -84,7 +84,6 @@
 (+ (roll-value (evaluate-roll (:r1 dice-roll)))
    (- (roll-value (evaluate-roll (:r2 dice-roll)))
       (* 3 4)))
-(evaluate-roll (:r2 dice-roll))
 
 (defn print-output
   "Takes a map of dice rolls and prints the result of each dice set operation and the operations"
@@ -152,10 +151,3 @@
 ;(* (roll-value (evaluate-roll dice-roll-1))
 ;   (+ (roll-value (evaluate-roll dice-roll-2))
 ;      (numerals-1)))
-
-;2d3 3d4 1 +
-;[2 3] [1 2 4] 1 +
-(fn [operator & n]
-  ; check for type
-  ; dice -> dice/sum
-  )
