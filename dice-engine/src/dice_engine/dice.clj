@@ -9,7 +9,7 @@
   (swap! id-counter inc))
 
 (defn rand-int-natural
-  "Returns a random integer between 1 to n (both inclusive)."
+  "Returns a random integer between 1 to n (both inclusive)"
   [n]
   (+ 1 (rand-int n)))
 
@@ -26,17 +26,17 @@
    :previous-values []})
 
 (defn sum
-  "Takes a list of die maps and returns the sum of the numeric values as an integer."
+  "Takes a list of die maps and returns the sum of the values"
   [dice]
   (->>
     (map :value dice)
     (reduce +)))
 
 (defn roll
-  "Returns literal dice, each with a value <= faces"
-  [literal faces]
+  "Returns n dice, each with a value <= faces"
+  [n faces]
   (->>
-    (repeatedly literal #(rand-int-natural faces))
+    (repeatedly n #(rand-int-natural faces))
     (map #(create-die % faces))))
 
 (defn reroll
@@ -46,71 +46,81 @@
              :previous-values (conj previous-values value)))
 
 (defn drop
-  "Applies the selector on dice with literal. Returns a new map
-  after discarding the dice that match the result of the selector."
-  [dice literal selector]
-  (filter
-    (complement
-      (partial selector literal))
-    dice))
+  "Applies the selector on dice with literal.
+  Returns dice unselected by selector."
+  [selector literal dice]
+  (->>
+    dice
+    (selector literal)
+    (second)))
 
 (defn keep
-  "Returns a new map after discarding the dice that do not match literal."
-  [dice literal selector]
-  (filter
-    (partial selector literal)
-    dice))
+  "Applies the selector on dice with literal.
+  Returns dice selected by selector."
+  [selector literal dice]
+  (->>
+    dice
+    (selector literal)
+    (first)))
 
 (defn reroll-matched
-  "Rerolls dice filtered by selector and returns the rerolled dice.
-   Rerolls until none of the dice can be filtered by selector."
-  [dice literal selector]
-  (prn dice)
-  (let [grouped-dice (group-by (partial selector literal) dice)
-        matched-dice (get grouped-dice true)
-        rest-dice (get grouped-dice false)]
+  "Rerolls dice selected by selector and returns the rerolled dice.
+   Rerolls until none of the dice qualify the selector."
+  [selector literal dice]
+  (let [[matched-dice rest-dice] (selector literal dice)]
     (if (empty? matched-dice)
       dice
-      (recur (concat (map reroll matched-dice)
-                     rest-dice)
-             literal
-             selector))))
+      (recur
+        selector
+        literal
+        (concat (map reroll matched-dice) rest-dice)))))
 
 (defn highest
-  "Returns a vector of integer values of the highest literal dice.
-  If the size of input dice vector (k) is less than literal, returns the highest k dice."
+  "Splits dice into two collections, by the first literal highest values and the rest"
   [literal dice]
   (->>
     dice
     (sort-by :value >)
-    (take literal)))
+    (split-at literal)))
 
 (defn lowest
-  "Returns a vector of integer values of the lowest literal dice.
-  If the size of input dice vector (k) is less than literal, returns the lowest k dice."
+  "Splits dice into two collections, by the first literal lowest values and the rest"
   [literal dice]
   (->>
     dice
     (sort-by :value)
-    (take literal)))
+    (split-at literal)))
+
+(defn partition-dice-by-value
+  "Splits dice into two collections, grouping them by applying pred on a die's value"
+  [pred dice]
+  (let [grouped-dice (group-by
+                       #(->
+                          (:value %)
+                          (pred))
+                       dice)]
+    (vector
+      (get grouped-dice true [])
+      (get grouped-dice false []))))
 
 (defn greater-than
-  "Returns a vector of integers of value > literal. Empty vector if none qualify."
-  [literal die]
-  (->
-    (:value die)
-    (> literal)))
+  "Splits dice into two collections, the first with values greater than literal and the second with the rest"
+  [literal dice]
+  (partition-dice-by-value
+    (partial #(> % literal))
+    dice))
 
 (defn lesser-than
-  "Returns a vector of integers of value > literal. Empty vector if none qualify."
-  [literal die]
-  (->
-    (:value die)
-    (< literal)))
+  "Splits dice into two collections, the first with values lesser than literal and the second with the rest"
+  [literal dice]
+  (partition-dice-by-value
+    (partial #(< % literal))
+    dice))
 
 (defn match
-  "Returns a vector of integers of value = literal. Empty vector if none match."
-  [literal die]
-  (->
-    (:value die)
-    (= literal)))
+  "Splits dice into two collections, the first with values that match literal and the second with the rest"
+  [literal dice]
+  (partition-dice-by-value
+    (partial = literal)
+    dice))
+
