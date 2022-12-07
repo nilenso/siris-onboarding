@@ -4,9 +4,11 @@
 
 (def dice-1 [{:id              1
               :value           3
+              :faces           6
               :previous-values []}
              {:id              2
               :value           4
+              :faces           6
               :previous-values []}])
 
 (def dice-2 [{:id              6
@@ -51,6 +53,36 @@
     (is (=
           (dice/keep dice/match 2 dice-1)
           []))))
+
+(deftest reroll-matched-test
+  (testing "should reroll the matched die"
+    (with-redefs-fn {#'dice/rand-int-natural (fn [_] 2)}
+      #(is (=
+             (dice/reroll-matched dice/match 3 dice-1)
+             [{:id              1
+               :value           2
+               :faces           6
+               :previous-values [3]}
+              {:id              2
+               :value           4
+               :faces           6
+               :previous-values []}]))))
+  (testing "should reroll until no die qualifies selector"
+    (let [rand-ints [5 9 1]]
+      (with-local-vars [counter -1]
+        (with-redefs-fn {#'dice/rand-int-natural (fn [_]
+                                                   (var-set counter (inc @counter))
+                                                   (nth rand-ints (var-get counter)))}
+          #(is (=
+                 (dice/reroll-matched dice/greater-than 3 dice-1)
+                 [{:id              1
+                   :value           3
+                   :faces           6
+                   :previous-values []}
+                  {:id              2
+                   :value           1
+                   :faces           6
+                   :previous-values [9 5 4]}])))))))
 
 (deftest highest-test
   (is (=
