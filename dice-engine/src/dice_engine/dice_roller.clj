@@ -19,6 +19,26 @@
     (filter #(not (:discarded %)) dice)
     (dice/sum)))
 
+(defn evaluate-roll
+  "Evaluates a dice roll, applies set operations and returns a dice collection"
+  [{:keys                               [roll]
+    {:keys [operator selector literal]} :set-operation}]
+  (let [operator-fn (operator dice-operators)
+        selector-fn (selector dice-selectors)
+        roll-values (dice/roll
+                      (:number-of-dice roll)
+                      (:faces roll))
+        result (operator-fn selector-fn literal roll-values)]
+    (map
+      (fn [{:keys [id] :as die}]
+        (if-let [result-die
+                 (->> result
+                   (filter #(= (:id %) id))
+                   (first))]
+          (assoc result-die :discarded false)
+          (assoc die :discarded true)))
+      roll-values)))
+
 (defn parse-roll-result
   "Parses a dice roll to in the format:
   (val1, ~discarded_val2~, val3 (~previousrollval3~, ~previousrollval3'~))"
@@ -44,26 +64,6 @@
        ")"
        " => "
        (roll-value outcomes)))
-
-(defn evaluate-roll
-  "Evaluates a dice roll, applies set operations and returns a dice collection"
-  [{:keys                               [roll]
-    {:keys [operator selector literal]} :set-operation}]
-  (let [operator-fn (operator dice-operators)
-        selector-fn (selector dice-selectors)
-        roll-values (dice/roll
-                      (:number-of-dice roll)
-                      (:faces roll))
-        result (operator-fn selector-fn literal roll-values)]
-    (map
-      (fn [{:keys [id] :as die}]
-        (if-let [result-die
-                 (->> result
-                   (filter #(= (:id %) id))
-                   (first))]
-          (assoc result-die :discarded false)
-          (assoc die :discarded true)))
-      roll-values)))
 
 (defn print-output
   "TODO:
