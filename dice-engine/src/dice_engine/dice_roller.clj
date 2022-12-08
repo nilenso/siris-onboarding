@@ -66,13 +66,3 @@
        ")"
        " => "
        (roll-value outcomes)))
-
-(defn print-output
-  "TODO:
-  Takes a map of dice rolls and prints the result of each dice set
-  operation and the operations"
-  [dice-roll operations]
-  (let [rolls (map (fn [[_ value :as roll]]
-                     (assoc roll :outcomes (evaluate-roll value)))
-                   dice-roll)]
-    rolls))
