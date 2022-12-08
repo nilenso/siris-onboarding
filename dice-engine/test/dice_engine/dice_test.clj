@@ -167,20 +167,56 @@
         7)))
 
 (deftest partition-dice-by-value-test
-  (is (= 1 1))
-  )
+  (is (= (dice/partition-dice-by-value (partial #(> % 5)) dice-2)
+         ['({:id              6
+             :value           7
+             :faces           20
+             :previous-values []}
+            {:id              8
+             :value           6
+             :faces           20
+             :previous-values []})
+          '({:id              7
+             :value           5
+             :faces           20
+             :previous-values []})])))
 
 (deftest roll-test
-  (is (= 1 1))
+  (let [rand-ints [4 6 8]]
+    (with-local-vars [counter -1
+                      id-counter 0]
+      (with-redefs-fn {#'dice/rand-int-natural (fn [_]
+                                                 (var-set counter (inc @counter))
+                                                 (nth rand-ints (var-get counter)))
+                       #'dice/get-id           (fn []
+                                                 (var-set id-counter (inc @id-counter))
+                                                 @id-counter)}
+        #(is (= (dice/roll 3 8)
+                [{:id              1
+                  :value           4
+                  :faces           8
+                  :previous-values []}
+                 {:id              2
+                  :value           6
+                  :faces           8
+                  :previous-values []}
+                 {:id              3
+                  :value           8
+                  :faces           8
+                  :previous-values []}])))))
   )
 
 (deftest create-dice-test
-  (is (= 1 1))
-  )
+  (with-redefs-fn {#'dice/get-id (fn [] 1)}
+    #(is (= (dice/create-die 4 5)
+            {:id              1
+             :value           4
+             :faces           5
+             :previous-values []}))))
 
 (deftest rand-int-natural-test
-  (is (= 1 1))
-  )
+  (with-redefs-fn {#'rand-int (fn [_] 0)}
+    #(is (= (dice/rand-int-natural 5) 1))))
 
 
 
