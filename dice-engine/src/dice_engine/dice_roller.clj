@@ -14,30 +14,31 @@
 
 (defn roll-value
   "Returns sum of all valid dice values"
-  [dice]
-  (->
-    (filter #(not (:discarded %)) dice)
+  [{:keys [outcomes]}]
+  (->> outcomes
+    (filter #(not (:discarded %)))
     (dice/sum)))
 
 (defn evaluate-roll
   "Evaluates a dice roll, applies set operations and returns a dice collection"
   [{:keys                               [roll]
-    {:keys [operator selector literal]} :set-operation}]
+    {:keys [operator selector literal]} :set-operation :as dice}]
   (let [operator-fn (operator dice-operators)
         selector-fn (selector dice-selectors)
         roll-values (dice/roll
                       (:number-of-dice roll)
                       (:faces roll))
         result (operator-fn selector-fn literal roll-values)]
-    (map
-      (fn [{:keys [id] :as die}]
-        (if-let [result-die
-                 (->> result
-                   (filter #(= (:id %) id))
-                   (first))]
-          (assoc result-die :discarded false)
-          (assoc die :discarded true)))
-      roll-values)))
+    (->> (map
+           (fn [{:keys [id] :as die}]
+             (if-let [result-die
+                      (->> result
+                        (filter #(= (:id %) id))
+                        (first))]
+               (assoc result-die :discarded false)
+               (assoc die :discarded true)))
+           roll-values)
+      (assoc dice :outcomes))))
 
 (defn parse-roll-result
   "Parses a dice roll to in the format:
@@ -55,7 +56,8 @@
     :else (str value)))
 
 (defn parse-output
-  "TODO: prefix and suffix 2d6kh1: (~2~, 5) => 5"
+  "Parses a die roll in the output format.
+  For instance, 2d6kh1: (~2~, 5) => 5"
   [{:keys [expression outcomes]}]
   (str expression ": "
        "("
