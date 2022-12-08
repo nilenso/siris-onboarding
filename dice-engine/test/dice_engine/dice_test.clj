@@ -29,15 +29,18 @@
     (is (= (dice/drop dice/match 3 dice-1)
            [{:id              2
              :value           4
+             :faces           6
              :previous-values []}])))
 
   (testing "should return the dice unchanged if none of the dice value match."
     (is (= (dice/drop dice/greater-than 5 dice-1)
            [{:id              1
              :value           3
+             :faces           6
              :previous-values []}
             {:id              2
              :value           4
+             :faces           6
              :previous-values []}]))))
 
 (deftest keep-test
@@ -46,6 +49,7 @@
           (dice/keep dice/match 4 dice-1)
           [{:id              2
             :value           4
+            :faces           6
             :previous-values []}])))
 
   (testing "should return empty vector if none of the dice values match"
@@ -74,14 +78,14 @@
                                                    (nth rand-ints (var-get counter)))}
           #(is (=
                  (dice/reroll-matched dice/greater-than 3 dice-1)
-                 [{:id              1
-                   :value           3
-                   :faces           6
-                   :previous-values []}
-                  {:id              2
+                 [{:id              2
                    :value           1
                    :faces           6
-                   :previous-values [9 5 4]}])))))))
+                   :previous-values '(9 5 4)}
+                  {:id              1
+                   :value           3
+                   :faces           6
+                   :previous-values []}])))))))
 
 (deftest highest-test
   (is (=
@@ -150,9 +154,11 @@
         (dice/match 4 dice-1)
         ['({:id              2
             :value           4
+            :faces           6
             :previous-values []})
          '({:id              1
             :value           3
+            :faces           6
             :previous-values []})])))
 
 (deftest sum-test
