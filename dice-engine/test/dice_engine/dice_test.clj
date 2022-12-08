@@ -38,8 +38,7 @@
              :previous-values []}
             {:id              2
              :value           4
-             :previous-values []}])))
-  )
+             :previous-values []}]))))
 
 (deftest keep-test
   (testing "should return dice that match the value"
@@ -146,7 +145,7 @@
              :faces           20
              :previous-values []})])))
 
-(deftest equal-test
+(deftest match-test
   (is (=
         (dice/match 4 dice-1)
         ['({:id              2
@@ -160,6 +159,22 @@
   (is (=
         (dice/sum dice-1)
         7)))
+
+(deftest partition-dice-by-value-test
+  (is (= 1 1))
+  )
+
+(deftest roll-test
+  (is (= 1 1))
+  )
+
+(deftest create-dice-test
+  (is (= 1 1))
+  )
+
+(deftest rand-int-natural-test
+  (is (= 1 1))
+  )
 
 
 

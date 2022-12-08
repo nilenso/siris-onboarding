@@ -43,7 +43,7 @@
   "Rerolls a die"
   [{:keys [value faces previous-values] :as die}]
   (assoc die :value (rand-int-natural faces)
-             :previous-values (cons previous-values value)))
+             :previous-values (cons value previous-values)))
 
 (defn drop
   "Applies the selector on dice with literal.
