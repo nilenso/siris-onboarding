@@ -58,11 +58,11 @@
 (defn parse-output
   "Parses a die roll in the output format.
   For instance, 2d6kh1: (~2~, 5) => 5"
-  [{:keys [expression outcomes]}]
+  [{:keys [expression outcomes] :as roll}]
   (str expression ": "
        "("
        (->> (map #(parse-roll-result %) outcomes)
          (string/join ", "))
        ")"
        " => "
-       (roll-value outcomes)))
+       (roll-value roll)))
