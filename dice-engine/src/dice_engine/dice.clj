@@ -1,7 +1,7 @@
 (ns dice-engine.dice
   (:refer-clojure :exclude [drop keep]))
 
-(def id-counter (atom -1))
+(def id-counter (atom 0))
 
 (defn get-id
   "Returns an auto incremented id"
@@ -29,7 +29,8 @@
   "Takes a list of die maps and returns the sum of the values"
   [dice]
   (->>
-    (map :value dice)
+    dice
+    (map :value)
     (reduce +)))
 
 (defn roll
