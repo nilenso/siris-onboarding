@@ -1,11 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
+)
+
+const (
+	CONNECTION_STRING = "postgres://siripr@localhost/warehouse-management-system?sslmode=disable"
 )
 
 func main() {
@@ -17,10 +23,12 @@ func main() {
 }
 
 func initialize() error {
-	err := setupDatabase()
+	db, err := setupDatabase(CONNECTION_STRING)
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(db.Stats())
 
 	err = startServer()
 	if err != nil {
@@ -30,9 +38,18 @@ func initialize() error {
 	return nil
 }
 
-func setupDatabase() error {
-	// TODO
-	return nil
+func setupDatabase(connectionString string) (*sql.DB, error) {
+	db, err := sql.Open("postgres", connectionString)
+	if err != nil {
+		return nil, err
+	}
+
+	err = db.Ping()
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
 
 func startServer() error {
