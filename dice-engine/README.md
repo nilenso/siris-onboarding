@@ -33,87 +33,165 @@ problem in Clojure.
 
 **Dice-roll notation:** `NdX`
 
-**Die map representation**
+**Die map**
 
 ```clojure
-(def die {:value           1
-          :discarded       false
+(def die {:id              1
+          :value           1
           :faces           3
           :previous-values [2 2]})
 ```
 
-**Dice-roll map representation -**
-
-`3d4`
-
-```clojure
-(def dice-roll {:numeric-value 8
-                :dice          [d1 d2 d3]})  ; d1, d2 and d3 are die maps of face value 4, 3 & 1
-``` 
-
-**Dice-expression map representation**
+**Dice-expression map**
 
 `3d4kh2`
 
 ```clojure
-(def dice-expr {:expr         "3d4kh2"
-                :set-selector highest       ; highest and keep are functions
-                :set-operator keep})
+{:expression    "3d4kh2"
+ :roll          {:number-of-dice 3
+                 :faces          4}
+ :set-operation {:operator :keep
+                 :selector :highest
+                 :literal  2}}
 ```
 
-_Parse dice expression_
+**Result map -**
+
+`3d4`
+
+```clojure
+ {:expression    "3d4kh2"
+  :roll          {:number-of-dice 3
+                  :faces          4}
+  :set-operation {:operator :keep
+                  :selector :highest
+                  :literal  2}
+  :outcomes      [{:id              1
+                   :value           3
+                   :faces           6
+                   :discarded       true
+                   :previous-values []}
+                  {:id              2
+                   :value           4
+                   :faces           6
+                   :discarded       false
+                   :previous-values []}
+                  {:id              1
+                   :value           6
+                   :faces           6
+                   :discarded       false
+                   :previous-values []}]}
+``` 
+
+- set operator functions
+- set selector functions
+- imperative shell
+  _Parse dice expression_
 
 - `parse-dice-expression`
     - Returns a map of dice-expr
 
+**Pure functions -**
+
 _Dice roll_
 
-- `rand [n]`
+- `get-id`
+    - Returns an auto incremented integer starting from 1
+- `rand-int-natural [n]`
+- `create-die [die-value faces]`
+    - Returns a die map of the form:
+      `{:id              a
+      :value           n
+      :faces           x
+      :previous-values []}`
 - `roll [n, faces]`
-    - Returns a dice-roll map after calling `rand [faces]` n times
-
-**Pure functions -**
+    - Returns `n` die maps. Calls `rand-int-natual` and `create-die`
+- `reroll [die]`
+    - Rerolls a single die. Updates its value and history.
 
 _Set operations_
 
-- `keep [dice-roll n]`
-    - Returns a new dice-roll map with `:numeric-value` updated \
-      and `discarded` updated to true where die value does not match `n`.
-- `drop [dice-roll n]`
-    - Returns a new dice-roll map with `:numeric-value` updated \
-      and `discarded` updated to true where die value matches `n`.
-- `reroll [dice-roll n]`
-    - Returns a new dice-roll map if none of the rerolled dice match `n`,\
-      otherwise recurses until none match. `previous-values` are updated for each dice \
-      on every roll.
+- `keep [selector literal dice]`
+    - Applies selector on dice. Returns dice selected by selector.
+- `drop [selector literal dice]`
+    - Applies selector on dice. Returns dice un-selected by selector.
+- `reroll [selector literal dice]`
+    - Applies selector on dice. If no dice are selected, returns dice
+      else, rerolls selected dice and appends the result to the un-selected dice.
+      Recurses until no dice qualifies selector.
 
 _Set selectors_
 
-(Return a new dice-roll map with `:numeric-value` updated \
-and `discarded` updated to true where die value matches `n`)
+The following return a partition of the dice, based on their respective filtering conditions
+`[[selected-dice] [unselected-dice]]`
 
-- `highest [x, dice]`
-- `lowest [x, dice]`
-- `greater-than [x, dice]`
-- `less-than [x, dice]`
+- `highest [literal, dice]`
+- `lowest [literal, dice]`
+- `greater-than [literal, dice]`
+- `lesser-than [literal, dice]`
+- `match [literal, dice]`
 
-**Imperative shell -**
+**Imperative shell and parsing functions-**
 
-1. `parse-input`
-    - represent the input expression as a tree
-        - numeric operators (`+`/`-`/`*`/`/`) are parent nodes
-        - child nodes can either be a `dice-roll` map or a number
-2. Solve the expressions bottom-up
-    - Order of execution
-        1. parse dice expression - `parse-dice-expression`
-        2. roll the dice
-        3. if `:set-selector` is not nil, call set-selector function
-        4. if `:set-operator` is not nil, pass the result of set-selector to set-operator
+The solution is expected to do the following
 
-### TODO
+1. Operations on dice:
+    - Roll dice
+    - Apply set operators and selectors.
+    - Track state of the roll.
+    - Compute the final effective value of the roll
+2. Compute result of the numeric operations on all the dice
 
-1. Test rerolls deterministically
-2. Make keep, drop and reroll variadic
-3. Consider making computing numeric value of dice a function
-4. Make set operator and selector function support sets and literal sets
-5. Consider breaking down `keep`, `drop` and `reroll` to smaller functions
+- `roll-value`
+    - Returns the sum of all valid dice in `:outcomes` of a roll. Valid dice being `:discarded false`
+
+- `evaluate-roll`
+    - The "imperative shell of the program". Takes a dice-expression map and returns the result map for that roll.
+        - Rolls n dice of x faces
+        - Applies set operation on the dice
+        - Marks dice missing from the result as discarded
+        - Associates the result to `:outcomes` and returns the result map
+
+- `parse-roll-result`
+    - Parses a single roll value in the form - `val`, `~discarded_val2~`
+      or `val (~previousrollval~, ~previousrollval'~)`
+
+- `parse-output`
+    - Parses output of a single roll in the format \
+      `2d6kh1: (~2~, 5) => 5`
+
+### Design choices
+
+**#1**
+
+- Dice operators (drop, keep, reroll) return all dice
+- They are responsible for updating dice state as follows
+    - keep: all dice that are not selected by selector are marked as discarded
+    - drop: all dice that are selected by selector are marked as discarded
+    - reroll: all dice selected by selector are rerolled (update previous-values) \
+      and recursed until no dice is selected by selector
+
+**#2**
+
+- Each die has an id
+- Dice operators only return the result of the set operation and not all dice
+- Selector functions return a subset of dice filtered based on the condition
+- Operator functions iterate over the original dice list and return the resulting dice
+
+> **Both the above approaches resulted in dice operators having to iterate over the original list of dice.**
+**To avoid the redundant iteration, the below were considered.**
+
+**#3**
+
+- To avoid the extra iteration, we can make selectors only return predicates
+- These predicates would be used by operators to filter dice
+- Dice operators now only return predicates and not a collection of dice
+- This wasn't extensible to range based selectors like `highest` and `lowest`. \
+  These operations cannot be represented as predicates.
+- This approach was later discarded
+
+**#4**
+
+- Operators return a partition of dice, as opposed to a subset of the dice
+- The first sequence of the partition contains selected dice and the second the unselected
+- Operators can now use either of these values without having to do another iteration on the original dice collection
