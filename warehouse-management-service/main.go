@@ -1,55 +1,43 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 	"os"
+	"warehouse-management-service/pkg/storage/postgres"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
 const (
-	CONNECTION_STRING = "postgres://siripr@localhost/warehouse-management-system?sslmode=disable"
+	DB_HOST     = "localhost"
+	DB_PORT     = "5432"
+	DB_USER     = "wms"
+	DB_PASSWORD = "x5t5%h^NsXE3"
+	DB_NAME     = "warehouse-management-system"
+	DB_SSL_MODE = false
 )
 
 func main() {
-	err := initialize()
+	db, err := postgres.New(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSL_MODE)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
 		os.Exit(1)
 	}
-}
-
-func initialize() error {
-	db, err := setupDatabase(CONNECTION_STRING)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(db.Stats())
+	// Close DB connection
+	defer func() {
+		err = db.Close()
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}()
 
 	err = startServer()
 	if err != nil {
-		return err
+		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
+		os.Exit(1)
 	}
-
-	return nil
-}
-
-func setupDatabase(connectionString string) (*sql.DB, error) {
-	db, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.Ping()
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
 }
 
 func startServer() error {
