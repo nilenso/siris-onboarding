@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"warehouse-management-service/internal/config"
 	"warehouse-management-service/pkg/storage/postgres"
 
 	"github.com/gin-gonic/gin"
@@ -11,21 +12,32 @@ import (
 )
 
 const (
-	DB_HOST     = "localhost"
-	DB_PORT     = "5432"
-	DB_USER     = "wms"
-	DB_PASSWORD = "x5t5%h^NsXE3"
-	DB_NAME     = "warehouse-management-system"
-	DB_SSL_MODE = false
+	CONFIG_FILE_PATH_ENV_VARIABLE = "CONFIG_FILE_PATH"
 )
 
 func main() {
-	db, err := postgres.New(DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME, DB_SSL_MODE)
+	// Get absolute path of config file from env variable
+	configFilePath, ok := os.LookupEnv(CONFIG_FILE_PATH_ENV_VARIABLE)
+	if !ok {
+		fmt.Fprintf(os.Stderr, "%s env variable not set", CONFIG_FILE_PATH_ENV_VARIABLE)
+	}
+
+	// Get config
+	config, err := config.FromFile(configFilePath)
+
+	// Get Postgres DB service
+	db, err := postgres.New(config.Postgres.Host,
+		config.Postgres.Port,
+		config.Postgres.Username,
+		config.Postgres.Password,
+		config.Postgres.DBName,
+		config.Postgres.SSLMode)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
 		os.Exit(1)
 	}
-	// Close DB connection
+
+	// Close DB connection at shutdown
 	defer func() {
 		err = db.Close()
 		if err != nil {
