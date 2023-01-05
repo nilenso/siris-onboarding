@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 	"warehouse-management-service/internal/config"
+	"warehouse-management-service/internal/server"
 	"warehouse-management-service/pkg/storage/postgres"
 
-	"github.com/gin-gonic/gin"
 	_ "github.com/lib/pq"
 )
 
@@ -24,6 +24,10 @@ func main() {
 
 	// Get config
 	config, err := config.FromFile(configFilePath)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
+		os.Exit(1)
+	}
 
 	// Get Postgres DB service
 	db, err := postgres.New(config.Postgres.Host,
@@ -45,21 +49,12 @@ func main() {
 		}
 	}()
 
-	err = startServer()
+	server := server.New(db)
+
+	http.ListenAndServe(":80", server.Router)
+
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
 		os.Exit(1)
 	}
-}
-
-func startServer() error {
-	router := gin.Default()
-
-	router.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	return router.Run(":80")
 }

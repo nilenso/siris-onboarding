@@ -15,7 +15,7 @@ type Postgres struct {
 }
 
 type Config struct {
-	Postgres Postgres
+	Postgres Postgres `json:"postgres"`
 }
 
 func FromFile(path string) (*Config, error) {
