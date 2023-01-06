@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"os"
 	"warehouse-management-service/internal/config"
-	"warehouse-management-service/internal/server"
+	"warehouse-management-service/internal/handler"
 	"warehouse-management-service/pkg/database/postgres"
 
 	_ "github.com/lib/pq"
@@ -49,9 +49,9 @@ func main() {
 		}
 	}()
 
-	server := server.New(db)
+	handler := handler.New(db)
 
-	http.ListenAndServe(":80", server.Router)
+	http.ListenAndServe(":80", handler)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
