@@ -6,7 +6,7 @@ import (
 	"os"
 	"warehouse-management-service/internal/config"
 	"warehouse-management-service/internal/server"
-	"warehouse-management-service/pkg/storage/postgres"
+	"warehouse-management-service/pkg/database/postgres"
 
 	_ "github.com/lib/pq"
 )
