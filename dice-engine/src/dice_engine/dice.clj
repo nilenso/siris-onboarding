@@ -108,20 +108,20 @@
   "Splits dice into two collections, the first with values greater than literal and the second with the rest"
   [literal dice]
   (partition-dice-by-value
-    (partial #(> % literal))
+    #(> % literal)
     dice))
 
 (defn lesser-than
   "Splits dice into two collections, the first with values lesser than literal and the second with the rest"
   [literal dice]
   (partition-dice-by-value
-    (partial #(< % literal))
+    #(< % literal)
     dice))
 
 (defn match
   "Splits dice into two collections, the first with values that match literal and the second with the rest"
   [literal dice]
   (partition-dice-by-value
-    (partial = literal)
+    #(= literal %)
     dice))
 
