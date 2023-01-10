@@ -203,8 +203,7 @@
                  {:id              3
                   :value           8
                   :faces           8
-                  :previous-values []}])))))
-  )
+                  :previous-values []}]))))))
 
 (deftest create-dice-test
   (with-redefs-fn {#'dice/get-id (fn [] 1)}
