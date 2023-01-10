@@ -85,7 +85,24 @@
                   {:id              1
                    :value           3
                    :faces           6
-                   :previous-values []}])))))))
+                   :previous-values []}]))))))
+
+  ;(testing "should reroll until no die qualifies selector"
+  ;  (dice/with-predictable-rolls #(is (=
+  ;                                      (dice/reroll-matched dice/greater-than 3 dice-1)
+  ;                                      [{:id              2
+  ;                                        :value           1
+  ;                                        :faces           6
+  ;                                        :previous-values '(9 5 4)}
+  ;                                       {:id              1
+  ;                                        :value           3
+  ;                                        :faces           6
+  ;                                        :previous-values []}]))
+  ;                               [5 9 1]))
+  )
+
+(dice/with-predictable-rolls #(dice/rand-int-natural 1) 5)
+(type #(dice/rand-int-natural 2))
 
 (deftest highest-test
   (is (=

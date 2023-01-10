@@ -125,3 +125,18 @@
     #(= literal %)
     dice))
 
+;(defmacro with-predictable-rolls
+;  [values function]
+;  (with-local-vars [counter -1]
+;    (with-redefs-fn {#'rand-int-natural (fn [_]
+;                                          (var-set counter (inc @counter))
+;                                          (nth values counter))}
+;      function)))
+
+(defmacro with-predictable-rolls
+  [function values]
+  (with-redefs-fn {#'rand-int-natural (fn [_]
+                                        (nth values 0))}
+    (function)))
+
+(with-predictable-rolls #(rand-int-natural 1) [5])
