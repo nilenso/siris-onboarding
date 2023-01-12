@@ -7,6 +7,7 @@ import (
 	"warehouse-management-service/internal/config"
 	"warehouse-management-service/internal/handler"
 	"warehouse-management-service/pkg/database/postgres"
+	"warehouse-management-service/pkg/log"
 
 	_ "github.com/lib/pq"
 )
@@ -16,16 +17,18 @@ const (
 )
 
 func main() {
+	logger := log.New(log.Warning)
+
 	// Get absolute path of config file from env variable
 	configFilePath, ok := os.LookupEnv(CONFIG_FILE_PATH_ENV_VARIABLE)
 	if !ok {
-		fmt.Fprintf(os.Stderr, "%s env variable not set", CONFIG_FILE_PATH_ENV_VARIABLE)
+		logger.Log(log.Fatal, fmt.Sprintf("%s env variable not set", CONFIG_FILE_PATH_ENV_VARIABLE))
 	}
 
 	// Get config
 	config, err := config.FromFile(configFilePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
+		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
 	}
 
@@ -37,7 +40,7 @@ func main() {
 		config.Postgres.DBName,
 		config.Postgres.SSLMode)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
+		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
 	}
 
@@ -45,7 +48,7 @@ func main() {
 	defer func() {
 		err = db.Close()
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err)
+			logger.Log(log.Error, err)
 		}
 	}()
 
@@ -54,7 +57,7 @@ func main() {
 	http.ListenAndServe(":80", handler)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
+		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
 	}
 }
