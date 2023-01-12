@@ -12,6 +12,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// EnvConfigFilePath is the env variable that specifies absolute path of the config file
 const EnvConfigFilePath = "CONFIG_FILE_PATH"
 
 func main() {
