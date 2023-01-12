@@ -12,17 +12,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	CONFIG_FILE_PATH_ENV_VARIABLE = "CONFIG_FILE_PATH"
-)
+const EnvConfigFilePath = "CONFIG_FILE_PATH"
 
 func main() {
 	logger := log.New(log.Warning)
 
 	// Get absolute path of config file from env variable
-	configFilePath, ok := os.LookupEnv(CONFIG_FILE_PATH_ENV_VARIABLE)
+	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
 	if !ok {
-		logger.Log(log.Fatal, fmt.Sprintf("%s env variable not set", CONFIG_FILE_PATH_ENV_VARIABLE))
+		logger.Log(log.Fatal, fmt.Sprintf("%s env variable not set", EnvConfigFilePath))
 	}
 
 	// Get config
