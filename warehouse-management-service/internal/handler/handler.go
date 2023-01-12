@@ -20,5 +20,8 @@ func New(db database.Service, logger log.Logger) http.Handler {
 }
 
 func (h *handler) Ping(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("pong"))
+	_, err := w.Write([]byte("pong"))
+	if err != nil {
+		h.logger.Log(log.Error, err)
+	}
 }
