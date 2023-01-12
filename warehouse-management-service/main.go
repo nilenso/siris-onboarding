@@ -52,7 +52,7 @@ func main() {
 		}
 	}()
 
-	handler := handler.New(db)
+	handler := handler.New(db, logger)
 
 	err = http.ListenAndServe(":80", handler)
 	switch err {

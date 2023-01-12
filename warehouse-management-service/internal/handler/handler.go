@@ -3,15 +3,18 @@ package handler
 import (
 	"net/http"
 	"warehouse-management-service/pkg/database"
+	"warehouse-management-service/pkg/log"
 )
 
 type handler struct {
-	db database.Service
+	db     database.Service
+	logger log.Logger
 }
 
-func New(db database.Service) http.Handler {
+func New(db database.Service, logger log.Logger) http.Handler {
 	handler := &handler{
-		db: db,
+		db:     db,
+		logger: logger,
 	}
 	return handler.router()
 }
