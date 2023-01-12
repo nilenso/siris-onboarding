@@ -54,10 +54,12 @@ func main() {
 
 	handler := handler.New(db)
 
-	http.ListenAndServe(":80", handler)
-
-	if err != nil {
-		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
+	err = http.ListenAndServe(":80", handler)
+	switch err {
+	case http.ErrServerClosed:
+		logger.Log(log.Info, "server shut down successfully")
+	default:
+		logger.Log(log.Error, fmt.Sprintf("error starting up server: %v", err))
 		os.Exit(1)
 	}
 }
