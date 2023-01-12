@@ -3,19 +3,19 @@ package postgres
 import (
 	"database/sql"
 	"fmt"
-	"warehouse-management-service/pkg/database"
+	"warehouse-management-service/internal/config"
 
 	// Loads postgres drivers
 	_ "github.com/lib/pq"
 )
 
-type postgres struct {
+type Postgres struct {
 	db *sql.DB
 }
 
-func New(host, port, user, password, dbName string, sslMode bool) (database.Service, error) {
-	connect := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, user, password, dbName)
+func New(config config.Postgres) (*Postgres, error) {
+	connect := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%v",
+		config.Host, config.Port, config.Username, config.Password, config.DBName, config.SSLMode)
 	db, err := sql.Open("postgres", connect)
 	if err != nil {
 		return nil, err
@@ -26,11 +26,11 @@ func New(host, port, user, password, dbName string, sslMode bool) (database.Serv
 		return nil, err
 	}
 
-	return &postgres{
+	return &Postgres{
 		db: db,
 	}, nil
 }
 
-func (p *postgres) Close() error {
+func (p *Postgres) Close() error {
 	return p.db.Close()
 }

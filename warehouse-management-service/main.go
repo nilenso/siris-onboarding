@@ -31,12 +31,7 @@ func main() {
 	}
 
 	// Get Postgres DB service
-	db, err := postgres.New(config.Postgres.Host,
-		config.Postgres.Port,
-		config.Postgres.Username,
-		config.Postgres.Password,
-		config.Postgres.DBName,
-		config.Postgres.SSLMode)
+	db, err := postgres.New(config.Postgres)
 	if err != nil {
 		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
