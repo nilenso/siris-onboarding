@@ -4,45 +4,52 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"warehouse-management-service/internal/config"
+	"warehouse-management-service/internal/handler"
+	"warehouse-management-service/pkg/database/postgres"
+	"warehouse-management-service/pkg/log"
 
-	"github.com/gin-gonic/gin"
+	_ "github.com/lib/pq"
 )
 
+// EnvConfigFilePath is the env variable that specifies absolute path of the config file
+const EnvConfigFilePath = "CONFIG_FILE_PATH"
+
 func main() {
-	err := initialize()
+	logger := log.New(log.Warning)
+
+	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
+	if !ok {
+		logger.Log(log.Fatal, fmt.Sprintf("%s env variable not set", EnvConfigFilePath))
+	}
+
+	config, err := config.FromFile(configFilePath)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "App startup error: %v", err)
+		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
 	}
-}
 
-func initialize() error {
-	err := setupDatabase()
+	db, err := postgres.New(config.Postgres)
 	if err != nil {
-		return err
+		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
+		os.Exit(1)
 	}
 
-	err = startServer()
-	if err != nil {
-		return err
+	defer func() {
+		err = db.Close()
+		if err != nil {
+			logger.Log(log.Error, err)
+		}
+	}()
+
+	handler := handler.New(db, logger)
+
+	err = http.ListenAndServe(":80", handler)
+	switch err {
+	case http.ErrServerClosed:
+		logger.Log(log.Info, "server shut down successfully")
+	default:
+		logger.Log(log.Error, fmt.Sprintf("error starting up server: %v", err))
+		os.Exit(1)
 	}
-
-	return nil
-}
-
-func setupDatabase() error {
-	// TODO
-	return nil
-}
-
-func startServer() error {
-	router := gin.Default()
-
-	router.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-
-	return router.Run(":80")
 }
