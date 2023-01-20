@@ -13,10 +13,8 @@ type Postgres struct {
 	db *sql.DB
 }
 
-func New(config config.Postgres) (*Postgres, error) {
-	connect := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%v",
-		config.Host, config.Port, config.Username, config.Password, config.DBName, config.SSLMode)
-	db, err := sql.Open("postgres", connect)
+func New(connectionURL string) (*Postgres, error) {
+	db, err := sql.Open("postgres", connectionURL)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +27,11 @@ func New(config config.Postgres) (*Postgres, error) {
 	return &Postgres{
 		db: db,
 	}, nil
+}
+
+func Connection(config config.Postgres) string {
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%v",
+		config.Host, config.Port, config.Username, config.Password, config.DBName, config.SSLMode)
 }
 
 func (p *Postgres) Close() error {

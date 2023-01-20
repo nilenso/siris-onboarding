@@ -29,7 +29,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	db, err := postgres.New(config.Postgres)
+	connectionURL := postgres.Connection(config.Postgres)
+	db, err := postgres.New(connectionURL)
 	if err != nil {
 		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
