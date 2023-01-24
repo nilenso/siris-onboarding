@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -16,6 +17,8 @@ import (
 const EnvConfigFilePath = "CONFIG_FILE_PATH"
 
 func main() {
+	runDBMigrations := *flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
+
 	logger := log.New(log.Warning)
 
 	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
@@ -29,10 +32,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	db, err := postgres.New(config.Postgres)
+	connectionURL := postgres.Connection(config.Postgres)
+	db, err := postgres.New(connectionURL)
 	if err != nil {
 		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
+	}
+
+	if runDBMigrations {
+		err = RunMigration(config.DBMigration.SourcePath, connectionURL)
+		if err != nil {
+			logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
+			os.Exit(1)
+		}
 	}
 
 	defer func() {
