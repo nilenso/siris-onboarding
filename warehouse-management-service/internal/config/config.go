@@ -14,8 +14,13 @@ type Postgres struct {
 	SSLMode  bool   `json:"sslMode"`
 }
 
+type DBMigration struct {
+	SourcePath string `json:"path"`
+}
+
 type Config struct {
-	Postgres Postgres `json:"postgres"`
+	Postgres    Postgres    `json:"postgres"`
+	DBMigration DBMigration `json:"dbMigration"`
 }
 
 func FromFile(path string) (*Config, error) {
