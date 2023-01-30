@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-type Postgres struct {
+type PostgresConfig struct {
 	Host     string `json:"host"`
 	Port     string `json:"port"`
 	Username string `json:"username"`
@@ -19,8 +19,9 @@ type DBMigration struct {
 }
 
 type Config struct {
-	Postgres    Postgres    `json:"postgres"`
-	DBMigration DBMigration `json:"dbMigration"`
+	LogLevel    string         `json:"logLevel"`
+	Postgres    PostgresConfig `json:"postgres"`
+	DBMigration DBMigration    `json:"dbMigration"`
 }
 
 func FromFile(path string) (*Config, error) {
