@@ -40,7 +40,7 @@ func main() {
 	}
 
 	if runDBMigrations {
-		err = RunMigration(config.DBMigration.SourcePath, connectionURL)
+		err := RunMigration(config.DBMigration.SourcePath, connectionURL)
 		if err != nil {
 			logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 			os.Exit(1)
