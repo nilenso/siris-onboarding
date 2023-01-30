@@ -20,9 +20,9 @@ type Logger interface {
 func (l Level) String() string {
 	level, err := levelToString(l)
 	if err != nil {
-		return level
+		return "unknown"
 	}
-	return "unknown"
+	return level
 }
 
 func levelToString(level Level) (string, error) {
