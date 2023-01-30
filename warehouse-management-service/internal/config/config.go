@@ -11,7 +11,7 @@ type Postgres struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 	DBName   string `json:"dbName"`
-	SSLMode  bool   `json:"sslMode"`
+	SSLMode  string `json:"sslMode"`
 }
 
 type DBMigration struct {

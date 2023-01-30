@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS item(
     sku TEXT NOT NULL references product(sku),
     expiration_DATE DATE,
     received_on TIMESTAMP NOT NULL,
-    shelf_id TEXT
+    shelf_id TEXT NOT NULL references shelf(id)
 );

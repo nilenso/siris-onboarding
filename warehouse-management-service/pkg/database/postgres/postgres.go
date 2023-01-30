@@ -30,8 +30,7 @@ func New(connectionURL string) (*Postgres, error) {
 }
 
 func Connection(config config.Postgres) string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%v",
-		config.Host, config.Port, config.Username, config.Password, config.DBName, config.SSLMode)
+	return fmt.Sprintf("postgresql://%s@%s:%s/%s?sslmode=%s", config.Username, config.Host, config.Port, config.DBName, config.SSLMode)
 }
 
 func (p *Postgres) Close() error {

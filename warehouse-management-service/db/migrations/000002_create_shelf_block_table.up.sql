@@ -3,5 +3,5 @@ CREATE TABLE IF NOT EXISTS shelf_block(
     aisle TEXT,
     rack TEXT,
     storage_type TEXT,
-    warehouse_id TEXT
+    warehouse_id TEXT references warehouse(id)
 );
