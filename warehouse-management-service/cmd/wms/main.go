@@ -58,8 +58,9 @@ func main() {
 
 	// Instantiate Postgres-backed services
 	warehouseService := postgres.NewWarehouseService(db)
+	shelfService := postgres.NewShelfService(db)
 
-	h := handler.New(logger, warehouseService)
+	h := handler.New(logger, warehouseService, shelfService)
 
 	err = http.ListenAndServe(":80", h)
 	switch err {

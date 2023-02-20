@@ -30,7 +30,7 @@ type WarehouseService interface {
 	DeleteWarehouse(ctx context.Context, id string) error
 }
 
-func New(name string, latitude float64, longitude float64) *Warehouse {
+func NewWarehouse(name string, latitude float64, longitude float64) *Warehouse {
 	return &Warehouse{
 		Id:        generateUUID(),
 		Name:      name,

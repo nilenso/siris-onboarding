@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -12,13 +13,19 @@ import (
 
 type handler struct {
 	warehouseService warehousemanagementservice.WarehouseService
+	shelfService     warehousemanagementservice.ShelfService
 	logger           log.Logger
 }
 
-func New(logger log.Logger, warehouseService warehousemanagementservice.WarehouseService) http.Handler {
+func New(
+	logger log.Logger,
+	warehouseService warehousemanagementservice.WarehouseService,
+	shelfService warehousemanagementservice.ShelfService,
+) http.Handler {
 	handler := &handler{
 		logger:           logger,
 		warehouseService: warehouseService,
+		shelfService:     shelfService,
 	}
 	return handler.router()
 }
@@ -94,7 +101,7 @@ func (h *handler) CreateWarehouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	warehouse := warehousemanagementservice.New(
+	warehouse := warehousemanagementservice.NewWarehouse(
 		createWarehouseRequest.Name,
 		createWarehouseRequest.Latitude,
 		createWarehouseRequest.Longitude,
@@ -223,6 +230,214 @@ func (h *handler) DeleteWarehouse(w http.ResponseWriter, r *http.Request) {
 			)
 		}
 	}
+}
+
+func (h *handler) GetShelfBlock(w http.ResponseWriter, r *http.Request) {
+	shelfBlockId := chi.URLParam(r, "shelfBlockId")
+
+	if shelfBlockId == "" {
+		err := fmt.Errorf("%v", wms.GetShelfBlockResponse{
+			Error: "shelf block id cannot be empty",
+		})
+		h.logger.Log(log.Error, err)
+		h.response(w, http.StatusBadRequest, err)
+		return
+	}
+
+	shelfBlock, err := h.shelfService.GetShelfBlockById(r.Context(), shelfBlockId)
+	switch err {
+	case warehousemanagementservice.ShelfBlockDoesNotExist:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(w, http.StatusNotFound, wms.GetShelfBlockResponse{Error: fmt.Sprintf(
+				"falied to get, shelfBlock: %s does not exist",
+				shelfBlockId,
+			)})
+		}
+	case nil:
+		{
+			h.response(w, http.StatusOK, wms.GetShelfBlockResponse{Response: shelfBlock})
+		}
+	default:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(w, http.StatusInternalServerError, wms.GetShelfBlockResponse{Error: "Failed to get shelfBlock"})
+		}
+	}
+}
+
+func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
+	var createShelfBlockRequest wms.CreateShelfBlockRequest
+
+	if r.Body == nil {
+		err := fmt.Errorf("request body cannot be empty")
+		h.logger.Log(log.Error, err)
+		h.response(w, http.StatusBadRequest, err)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&createShelfBlockRequest)
+	if err != nil {
+		h.logger.Log(log.Error, err)
+		h.response(w, http.StatusBadRequest, wms.ShelfBlockResponse{
+			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
+	}
+	shelfBlock := warehousemanagementservice.NewShelfBlock(
+		createShelfBlockRequest.Aisle,
+		createShelfBlockRequest.Rack,
+		createShelfBlockRequest.StorageType,
+		createShelfBlockRequest.WarehouseId)
+
+	err = h.shelfService.CreateShelfBlock(r.Context(), shelfBlock)
+	switch err {
+	case nil:
+		{
+			h.response(w, http.StatusOK, wms.ShelfBlockResponse{Response: fmt.Sprintf(
+				"Successfully created shelf_block: %s",
+				shelfBlock.Id,
+			)})
+		}
+	case warehousemanagementservice.InvalidWarehouse:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(w, http.StatusBadRequest, wms.ShelfBlockResponse{Error: fmt.Sprintf("%s: %s",
+				err.Error(),
+				shelfBlock.Id,
+			)})
+		}
+	default:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(
+				w,
+				http.StatusInternalServerError,
+				wms.ShelfBlockResponse{Error: "Failed to create shelf block"},
+			)
+		}
+	}
+}
+
+func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
+	var updateShelfBlockRequest wms.UpdateShelfBlockRequest
+
+	if r.Body == nil {
+		err := fmt.Errorf("request body cannot be empty")
+		h.logger.Log(log.Error, err)
+		h.response(w, http.StatusBadRequest, err)
+		return
+	}
+
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+	err := decoder.Decode(&updateShelfBlockRequest)
+	if err != nil {
+		h.logger.Log(log.Error, err)
+		h.response(w, http.StatusBadRequest, wms.ShelfBlockResponse{
+			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
+		return
+	}
+
+	shelfBlock := warehousemanagementservice.ShelfBlock{
+		Id:          updateShelfBlockRequest.Id,
+		Aisle:       updateShelfBlockRequest.Aisle,
+		Rack:        updateShelfBlockRequest.Rack,
+		StorageType: updateShelfBlockRequest.StorageType,
+		WarehouseId: updateShelfBlockRequest.WarehouseId,
+	}
+	err = h.shelfService.UpdateShelfBlock(r.Context(), shelfBlock)
+	switch err {
+	case nil:
+		{
+			h.response(w, http.StatusOK, wms.ShelfBlockResponse{Response: fmt.Sprintf(
+				"Successfully updated shelf_block: %s",
+				shelfBlock.Id,
+			)})
+		}
+	case warehousemanagementservice.ShelfBlockDoesNotExist:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(w, http.StatusNotFound, wms.ShelfBlockResponse{Error: fmt.Sprintf(
+				"falied to update, warehouse: %s does not exist",
+				updateShelfBlockRequest.Id,
+			)})
+			return
+		}
+	case warehousemanagementservice.InvalidWarehouse:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(w, http.StatusBadRequest, wms.ShelfBlockResponse{Error: fmt.Sprintf("%s: %s",
+				err.Error(),
+				shelfBlock.Id,
+			)})
+		}
+	default:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(
+				w,
+				http.StatusInternalServerError,
+				wms.ShelfBlockResponse{Error: "Failed to update shelf block"},
+			)
+		}
+	}
+
+}
+
+func (h *handler) DeleteShelfBlock(w http.ResponseWriter, r *http.Request) {
+	shelfBlockId := chi.URLParam(r, "shelfBlockId")
+
+	if shelfBlockId == "" {
+		err := fmt.Errorf("%v", wms.ShelfBlockResponse{Error: "shelf_block id cannot be empty"})
+		h.logger.Log(log.Error, err)
+		h.response(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err := h.shelfService.DeleteShelfBlockById(r.Context(), shelfBlockId)
+	switch err {
+	case warehousemanagementservice.ShelfBlockDoesNotExist:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(w, http.StatusNotFound, wms.ShelfBlockResponse{Error: fmt.Sprintf(
+				"falied to delete, shelf block: %s does not exist",
+				shelfBlockId,
+			)})
+			return
+		}
+	case context.Canceled:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(w, http.StatusBadRequest, wms.ShelfBlockResponse{Error: fmt.Sprintf(
+				"falied to delete, shelf block: %s does not exist",
+				shelfBlockId,
+			)})
+			return
+		}
+	case nil:
+		{
+			h.response(
+				w,
+				http.StatusOK,
+				wms.ShelfBlockResponse{Response: fmt.Sprintf(
+					"Successfully deleted shelf block: %s",
+					shelfBlockId,
+				)},
+			)
+		}
+	default:
+		{
+			h.logger.Log(log.Error, err)
+			h.response(
+				w,
+				http.StatusInternalServerError,
+				wms.ShelfBlockResponse{Error: "Failed to delete shelf block"},
+			)
+			return
+		}
+	}
+
 }
 
 func (h *handler) response(w http.ResponseWriter, statusCode int, response interface{}) {
