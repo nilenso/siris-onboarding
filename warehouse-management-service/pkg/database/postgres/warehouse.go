@@ -9,7 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type queries interface {
+type warehouseQueries interface {
 	createWarehouseTx(ctx context.Context, tx *sql.Tx, warehouse *wms.Warehouse) error
 	getWarehouseByIdTx(ctx context.Context, tx *sql.Tx, id string) (*wms.Warehouse, error)
 	updateWarehouseTx(ctx context.Context, tx *sql.Tx, warehouse *wms.Warehouse) error
@@ -19,7 +19,7 @@ type queries interface {
 type queriesImpl struct{}
 
 type WarehouseService struct {
-	queries queries
+	queries warehouseQueries
 	db      *sql.DB
 }
 
@@ -42,8 +42,8 @@ func (w *WarehouseService) GetWarehouseById(ctx context.Context, id string) (*wm
 	warehouse, err := w.queries.getWarehouseByIdTx(ctx, tx, id)
 	switch err {
 	case nil:
-		return warehouse, nil
-	case RowDoesNotExist:
+		return warehouse, tx.Commit()
+	case sql.ErrNoRows:
 		return nil, wms.WarehouseDoesNotExist
 	default:
 		return nil, err
