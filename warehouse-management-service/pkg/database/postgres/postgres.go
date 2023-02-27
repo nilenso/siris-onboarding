@@ -10,10 +10,15 @@ import (
 )
 
 type Postgres struct {
-	db *sql.DB
+	config.PostgresConfig
 }
 
-func New(connectionURL string) (*Postgres, error) {
+func New(config config.PostgresConfig) *Postgres {
+	return &Postgres{PostgresConfig: config}
+}
+
+func (p *Postgres) Open() (*sql.DB, error) {
+	connectionURL := buildConnectionURL(p.PostgresConfig)
 	db, err := sql.Open("postgres", connectionURL)
 	if err != nil {
 		return nil, err
@@ -24,16 +29,9 @@ func New(connectionURL string) (*Postgres, error) {
 		return nil, err
 	}
 
-	return &Postgres{
-		db: db,
-	}, nil
+	return db, nil
 }
 
-func Connection(config config.Postgres) string {
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%v",
-		config.Host, config.Port, config.Username, config.Password, config.DBName, config.SSLMode)
-}
-
-func (p *Postgres) Close() error {
-	return p.db.Close()
+func buildConnectionURL(config config.PostgresConfig) string {
+	return fmt.Sprintf("postgresql://%s@%s:%s/%s?sslmode=%s", config.Username, config.Host, config.Port, config.DBName, config.SSLMode)
 }

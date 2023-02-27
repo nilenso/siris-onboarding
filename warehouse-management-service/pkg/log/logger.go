@@ -15,14 +15,15 @@ const (
 
 type Logger interface {
 	Log(level Level, message interface{})
+	SetLevel(level string)
 }
 
 func (l Level) String() string {
 	level, err := levelToString(l)
 	if err != nil {
-		return level
+		return "unknown"
 	}
-	return "unknown"
+	return level
 }
 
 func levelToString(level Level) (string, error) {
@@ -39,4 +40,20 @@ func levelToString(level Level) (string, error) {
 		return "debug", nil
 	}
 	return "", fmt.Errorf("Not a valid log level: %v", level)
+}
+
+func stringToLevel(level string) (Level, error) {
+	switch level {
+	case "fatal":
+		return Fatal, nil
+	case "error":
+		return Error, nil
+	case "warning":
+		return Warning, nil
+	case "info":
+		return Info, nil
+	case "debug":
+		return Debug, nil
+	}
+	return Fatal, fmt.Errorf("Not a valid log level: %v", level)
 }

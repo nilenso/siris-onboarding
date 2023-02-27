@@ -10,10 +10,16 @@ type StdoutLogger struct {
 	level Level
 }
 
-func New(level Level) Logger {
-	return &StdoutLogger{
-		level: level,
+func New() Logger {
+	return new(StdoutLogger)
+}
+
+func (s *StdoutLogger) SetLevel(level string) {
+	l, err := stringToLevel(level)
+	if err != nil {
+		fmt.Printf("Invalid level: %s, defaulting to %s", level, l.String())
 	}
+	s.level = l
 }
 
 func (s *StdoutLogger) Log(level Level, message interface{}) {

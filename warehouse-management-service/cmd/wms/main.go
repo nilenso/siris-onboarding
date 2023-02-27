@@ -13,34 +13,36 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// EnvConfigFilePath is the env variable that specifies absolute path of the config file
-const EnvConfigFilePath = "CONFIG_FILE_PATH"
+const (
+	EnvConfigFilePath = "CONFIG_FILE_PATH"
+)
 
 func main() {
 	runDBMigrations := *flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
 
-	logger := log.New(log.Warning)
-
 	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
 	if !ok {
-		logger.Log(log.Fatal, fmt.Sprintf("%s env variable not set", EnvConfigFilePath))
+		panic("Failed to read environment variable")
 	}
 
-	config, err := config.FromFile(configFilePath)
+	appConfig, err := config.FromFile(configFilePath)
 	if err != nil {
-		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
-		os.Exit(1)
+		panic("Failed to read appConfig file")
 	}
 
-	connectionURL := postgres.Connection(config.Postgres)
-	db, err := postgres.New(connectionURL)
+	logger := log.New()
+	logger.SetLevel(appConfig.LogLevel)
+
+	pg := postgres.New(appConfig.Postgres)
+
+	db, err := pg.Open()
 	if err != nil {
 		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 		os.Exit(1)
 	}
 
 	if runDBMigrations {
-		err = RunMigration(config.DBMigration.SourcePath, connectionURL)
+		err := pg.RunMigration(appConfig.DBMigration.SourcePath)
 		if err != nil {
 			logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 			os.Exit(1)
@@ -54,9 +56,12 @@ func main() {
 		}
 	}()
 
-	handler := handler.New(db, logger)
+	// Instantiate Postgres-backed services
+	warehouseService := postgres.NewWarehouseService(db)
 
-	err = http.ListenAndServe(":80", handler)
+	h := handler.New(logger, warehouseService)
+
+	err = http.ListenAndServe(":80", h)
 	switch err {
 	case http.ErrServerClosed:
 		logger.Log(log.Info, "server shut down successfully")

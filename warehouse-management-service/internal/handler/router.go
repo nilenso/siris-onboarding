@@ -13,5 +13,10 @@ func (h *handler) router() http.Handler {
 
 	router.Get("/ping", h.Ping)
 
+	router.Get("/warehouse/{warehouseId}", h.GetWarehouse)
+	router.Post("/warehouse", h.CreateWarehouse)
+	router.Put("/warehouse", h.UpdateWarehouse)
+	router.Delete("/warehouse/{warehouseId}", h.DeleteWarehouse)
+
 	return router
 }
