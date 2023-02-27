@@ -1,4 +1,4 @@
-package wms
+package api
 
 import (
 	"fmt"

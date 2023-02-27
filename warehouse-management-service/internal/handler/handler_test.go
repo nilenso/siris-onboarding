@@ -13,8 +13,8 @@ import (
 	"testing"
 	warehousemanagementservice "warehouse-management-service"
 	mock "warehouse-management-service/internal/handler/mock"
+	"warehouse-management-service/pkg/api"
 	"warehouse-management-service/pkg/log"
-	"warehouse-management-service/pkg/wms"
 )
 
 var h *handler
@@ -38,21 +38,21 @@ var getWarehouseByIdTests = []struct {
 		warehouseByIdResponse:   &warehouse,
 		warehouseByIdErr:        nil,
 		wantStatusCode:          http.StatusOK,
-		wantResponse:            wms.GetWarehouseResponse{Response: warehouse},
+		wantResponse:            api.GetWarehouseResponse{Response: warehouse},
 	},
 	{
 		getWarehouseByIdRequest: warehouse.Id,
 		warehouseByIdResponse:   nil,
 		warehouseByIdErr:        sql.ErrConnDone,
 		wantStatusCode:          http.StatusInternalServerError,
-		wantResponse:            wms.GetWarehouseResponse{Error: "Failed to get warehouse"},
+		wantResponse:            api.GetWarehouseResponse{Error: "Failed to get warehouse"},
 	},
 	{
 		getWarehouseByIdRequest: warehouse.Id,
 		warehouseByIdResponse:   nil,
 		warehouseByIdErr:        warehousemanagementservice.WarehouseDoesNotExist,
 		wantStatusCode:          http.StatusNotFound,
-		wantResponse: wms.GetWarehouseResponse{Error: fmt.Sprintf(
+		wantResponse: api.GetWarehouseResponse{Error: fmt.Sprintf(
 			"failed to get, warehouse: %s does not exist",
 			warehouse.Id,
 		)},
@@ -60,112 +60,112 @@ var getWarehouseByIdTests = []struct {
 }
 
 var createWarehouseTests = []struct {
-	createWarehouseRequest wms.CreateWarehouseRequest
+	createWarehouseRequest api.CreateWarehouseRequest
 	warehouseByIdErr       error
 	wantStatusCode         int
-	wantResponse           wms.WarehouseResponse
+	wantResponse           api.WarehouseResponse
 }{
 	{
-		createWarehouseRequest: wms.CreateWarehouseRequest{
+		createWarehouseRequest: api.CreateWarehouseRequest{
 			Name:      "test_create",
 			Latitude:  12.989127,
 			Longitude: 77.597088,
 		},
 		warehouseByIdErr: nil,
 		wantStatusCode:   http.StatusOK,
-		wantResponse: wms.WarehouseResponse{
+		wantResponse: api.WarehouseResponse{
 			Response: "Successfully created warehouse: 955fd0a8-1f2e-437f-b988-4b9d3d2acf81",
 		},
 	},
 	{
-		createWarehouseRequest: wms.CreateWarehouseRequest{
+		createWarehouseRequest: api.CreateWarehouseRequest{
 			Name:      "test_create",
 			Latitude:  12.989127,
 			Longitude: 77.597088,
 		},
 		warehouseByIdErr: sql.ErrConnDone,
 		wantStatusCode:   http.StatusInternalServerError,
-		wantResponse:     wms.WarehouseResponse{Error: "Failed to create warehouse"},
+		wantResponse:     api.WarehouseResponse{Error: "Failed to create warehouse"},
 	},
 }
 
 var createWarehouseBadRequestTests = []struct {
 	createWarehouseRequest interface{}
-	want                   wms.WarehouseResponse
+	want                   api.WarehouseResponse
 	wantStatusCode         int
 }{
 	{
 		createWarehouseRequest: nil,
-		want:                   wms.WarehouseResponse{Error: "request body cannot be empty"},
+		want:                   api.WarehouseResponse{Error: "request body cannot be empty"},
 		wantStatusCode:         http.StatusBadRequest,
 	},
 	{
 		createWarehouseRequest: map[string]string{"foo": "bar"},
-		want:                   wms.WarehouseResponse{Error: "Failed to parse request"},
+		want:                   api.WarehouseResponse{Error: "Failed to parse request"},
 		wantStatusCode:         http.StatusBadRequest,
 	},
 	{
-		createWarehouseRequest: wms.CreateWarehouseRequest{
+		createWarehouseRequest: api.CreateWarehouseRequest{
 			Name:      "",
 			Latitude:  -90.21,
 			Longitude: -180.78,
 		},
-		want: wms.WarehouseResponse{Error: "Invalid input: name cannot be empty, latitude has to be in the range [-90, 90], " +
+		want: api.WarehouseResponse{Error: "Invalid input: name cannot be empty, latitude has to be in the range [-90, 90], " +
 			"longitude has to be in the range [-180, 180]"},
 		wantStatusCode: http.StatusBadRequest,
 	},
 	{
-		createWarehouseRequest: wms.CreateWarehouseRequest{
+		createWarehouseRequest: api.CreateWarehouseRequest{
 			Name:      "test_update",
 			Latitude:  100,
 			Longitude: 190.89,
 		},
-		want: wms.WarehouseResponse{Error: "Invalid input: latitude has to be in the range [-90, 90], " +
+		want: api.WarehouseResponse{Error: "Invalid input: latitude has to be in the range [-90, 90], " +
 			"longitude has to be in the range [-180, 180]"},
 		wantStatusCode: http.StatusBadRequest,
 	},
 }
 
 var updateWarehouseTests = []struct {
-	updateWarehouseRequest  wms.UpdateWarehouseRequest
+	updateWarehouseRequest  api.UpdateWarehouseRequest
 	updateWarehouseErr      error
-	updateWarehouseResponse wms.WarehouseResponse
+	updateWarehouseResponse api.WarehouseResponse
 	wantStatusCode          int
 }{
 	{
-		updateWarehouseRequest: wms.UpdateWarehouseRequest{
+		updateWarehouseRequest: api.UpdateWarehouseRequest{
 			Id:        "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 			Name:      "test_update",
 			Latitude:  12.5678,
 			Longitude: 77.8901,
 		},
 		updateWarehouseErr: nil,
-		updateWarehouseResponse: wms.WarehouseResponse{Response: fmt.Sprintf(
+		updateWarehouseResponse: api.WarehouseResponse{Response: fmt.Sprintf(
 			"Successfully updated warehouse: %s",
 			"85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 		)},
 		wantStatusCode: http.StatusOK,
 	},
 	{
-		updateWarehouseRequest: wms.UpdateWarehouseRequest{
+		updateWarehouseRequest: api.UpdateWarehouseRequest{
 			Id:        "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 			Name:      "test_update",
 			Latitude:  12.5678,
 			Longitude: 77.8901,
 		},
 		updateWarehouseErr:      sql.ErrConnDone,
-		updateWarehouseResponse: wms.WarehouseResponse{Error: "Failed to update warehouse"},
+		updateWarehouseResponse: api.WarehouseResponse{Error: "Failed to update warehouse"},
 		wantStatusCode:          http.StatusInternalServerError,
 	},
 	{
-		updateWarehouseRequest: wms.UpdateWarehouseRequest{
+		updateWarehouseRequest: api.UpdateWarehouseRequest{
 			Id:        "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 			Name:      "test_update",
 			Latitude:  12.5678,
 			Longitude: 77.8901,
 		},
 		updateWarehouseErr: warehousemanagementservice.WarehouseDoesNotExist,
-		updateWarehouseResponse: wms.WarehouseResponse{Error: fmt.Sprintf(
+		updateWarehouseResponse: api.WarehouseResponse{Error: fmt.Sprintf(
 			"failed to update, warehouse: %s does not exist",
 			"85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 		)},
@@ -175,38 +175,38 @@ var updateWarehouseTests = []struct {
 
 var updateWarehouseBadRequestTests = []struct {
 	updateWarehouseRequest interface{}
-	want                   wms.WarehouseResponse
+	want                   api.WarehouseResponse
 	wantStatusCode         int
 }{
 	{
 		updateWarehouseRequest: nil,
-		want:                   wms.WarehouseResponse{Error: "request body cannot be empty"},
+		want:                   api.WarehouseResponse{Error: "request body cannot be empty"},
 		wantStatusCode:         http.StatusBadRequest,
 	},
 	{
 		updateWarehouseRequest: map[string]string{"foo": "bar"},
-		want:                   wms.WarehouseResponse{Error: "Failed to parse request"},
+		want:                   api.WarehouseResponse{Error: "Failed to parse request"},
 		wantStatusCode:         http.StatusBadRequest,
 	},
 	{
-		updateWarehouseRequest: wms.UpdateWarehouseRequest{
+		updateWarehouseRequest: api.UpdateWarehouseRequest{
 			Id:        "",
 			Name:      "",
 			Latitude:  -90.21,
 			Longitude: -180.78,
 		},
-		want: wms.WarehouseResponse{Error: "Invalid input: id cannot be empty, name cannot be empty, latitude has to be in the range [-90, 90], " +
+		want: api.WarehouseResponse{Error: "Invalid input: id cannot be empty, name cannot be empty, latitude has to be in the range [-90, 90], " +
 			"longitude has to be in the range [-180, 180]"},
 		wantStatusCode: http.StatusBadRequest,
 	},
 	{
-		updateWarehouseRequest: wms.UpdateWarehouseRequest{
+		updateWarehouseRequest: api.UpdateWarehouseRequest{
 			Id:        "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 			Name:      "test_update",
 			Latitude:  100,
 			Longitude: 190.89,
 		},
-		want: wms.WarehouseResponse{Error: "Invalid input: latitude has to be in the range [-90, 90], " +
+		want: api.WarehouseResponse{Error: "Invalid input: latitude has to be in the range [-90, 90], " +
 			"longitude has to be in the range [-180, 180]"},
 		wantStatusCode: http.StatusBadRequest,
 	},
@@ -216,13 +216,13 @@ var deleteWarehouseTests = []struct {
 	deleteWarehouseRequest string
 	deleteWarehouseErr     error
 	wantStatusCode         int
-	wantResponse           wms.WarehouseResponse
+	wantResponse           api.WarehouseResponse
 }{
 	{
 		deleteWarehouseRequest: warehouse.Id,
 		deleteWarehouseErr:     nil,
 		wantStatusCode:         http.StatusOK,
-		wantResponse: wms.WarehouseResponse{Response: fmt.Sprintf(
+		wantResponse: api.WarehouseResponse{Response: fmt.Sprintf(
 			"Successfully deleted warehouse: %s",
 			warehouse.Id,
 		)},
@@ -231,13 +231,13 @@ var deleteWarehouseTests = []struct {
 		deleteWarehouseRequest: warehouse.Id,
 		deleteWarehouseErr:     sql.ErrConnDone,
 		wantStatusCode:         http.StatusInternalServerError,
-		wantResponse:           wms.WarehouseResponse{Error: "Failed to delete warehouse"},
+		wantResponse:           api.WarehouseResponse{Error: "Failed to delete warehouse"},
 	},
 	{
 		deleteWarehouseRequest: warehouse.Id,
 		deleteWarehouseErr:     warehousemanagementservice.WarehouseDoesNotExist,
 		wantStatusCode:         http.StatusNotFound,
-		wantResponse: wms.WarehouseResponse{Error: fmt.Sprintf(
+		wantResponse: api.WarehouseResponse{Error: fmt.Sprintf(
 			"failed to delete, warehouse: %s does not exist",
 			warehouse.Id,
 		)},
@@ -299,7 +299,7 @@ func TestGetWarehouseById(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		var got wms.GetWarehouseResponse
+		var got api.GetWarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
 
 		if response.StatusCode != test.wantStatusCode {
@@ -345,7 +345,7 @@ func TestCreateWarehouse(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		var got wms.WarehouseResponse
+		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
 
 		if response.StatusCode != test.wantStatusCode {
@@ -384,7 +384,7 @@ func TestCreateWarehouseRequestError(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		var got wms.WarehouseResponse
+		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
 
 		if response.StatusCode != test.wantStatusCode {
@@ -423,7 +423,7 @@ func TestUpdateWarehouseRequestError(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		var got wms.WarehouseResponse
+		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
 
 		if response.StatusCode != test.wantStatusCode {
@@ -475,7 +475,7 @@ func TestUpdateWarehouse(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		var got wms.WarehouseResponse
+		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
 
 		if response.StatusCode != test.wantStatusCode {
@@ -514,7 +514,7 @@ func TestDeleteWarehouse(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		var got wms.WarehouseResponse
+		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
 
 		if response.StatusCode != test.wantStatusCode {
