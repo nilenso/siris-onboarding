@@ -25,7 +25,7 @@ func TestGetShelfBlockByIdTx(t *testing.T) {
 		WarehouseId: "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 	}
 
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
@@ -62,7 +62,7 @@ func TestGetShelfBlockByIdTx(t *testing.T) {
 		return
 	}
 
-	shelfBlockFromDB, err := shelfBlockService.queries.getShelfBlockByIdTx(
+	shelfBlockFromDB, err := shelfService.queries.getShelfBlockByIdTx(
 		context.Background(),
 		tx,
 		shelfBlock.Id,
@@ -74,13 +74,13 @@ func TestGetShelfBlockByIdTx(t *testing.T) {
 }
 
 func TestGetShelfBlockByIdTxError(t *testing.T) {
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 	}
 	defer tx.Rollback()
 
-	_, err = shelfBlockService.queries.getShelfBlockByIdTx(context.Background(), tx, "bad_id")
+	_, err = shelfService.queries.getShelfBlockByIdTx(context.Background(), tx, "bad_id")
 	if err == nil {
 		t.Errorf("expected: %v, got: %v", "error", err)
 	}
@@ -102,7 +102,7 @@ func TestCreateShelfBlockTx(t *testing.T) {
 		WarehouseId: "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 	}
 
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
@@ -125,7 +125,7 @@ func TestCreateShelfBlockTx(t *testing.T) {
 		return
 	}
 
-	err = shelfBlockService.queries.createShelfBlockTx(context.Background(), tx, shelfBlock)
+	err = shelfService.queries.createShelfBlockTx(context.Background(), tx, shelfBlock)
 	if err != nil {
 		t.Error(err)
 	}
@@ -160,14 +160,14 @@ func TestCreateShelfBlockTxError(t *testing.T) {
 		WarehouseId: "c69a7de2-25dc-456d-af3a-c9c4674174b2",
 	}
 
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer tx.Rollback()
 
-	err = shelfBlockService.queries.createShelfBlockTx(context.Background(), tx, shelfBlock)
+	err = shelfService.queries.createShelfBlockTx(context.Background(), tx, shelfBlock)
 	if err == nil {
 		t.Errorf("want: %v, got: %v", "error", err)
 	}
@@ -197,7 +197,7 @@ func TestUpdateShelfBlockTx(t *testing.T) {
 		WarehouseId: "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 	}
 
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
@@ -234,7 +234,7 @@ func TestUpdateShelfBlockTx(t *testing.T) {
 		return
 	}
 
-	err = shelfBlockService.queries.updateShelfBlockTx(context.Background(), tx, shelfBlockUpdated)
+	err = shelfService.queries.updateShelfBlockTx(context.Background(), tx, shelfBlockUpdated)
 	if err != nil {
 		t.Error(err)
 	}
@@ -270,14 +270,14 @@ func TestUpdateShelfBlockTxError(t *testing.T) {
 		WarehouseId: "xx",
 	}
 
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer tx.Rollback()
 
-	err = shelfBlockService.queries.updateShelfBlockTx(context.Background(), tx, shelfBlockUpdated)
+	err = shelfService.queries.updateShelfBlockTx(context.Background(), tx, shelfBlockUpdated)
 	if err == nil {
 		t.Errorf("want: %v, got: %v", "error", err)
 	}
@@ -299,7 +299,7 @@ func TestDeleteShelfBlockTx(t *testing.T) {
 		WarehouseId: "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
 	}
 
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
@@ -336,7 +336,7 @@ func TestDeleteShelfBlockTx(t *testing.T) {
 		return
 	}
 
-	err = shelfBlockService.queries.deleteShelfBlockTx(
+	err = shelfService.queries.deleteShelfBlockTx(
 		context.Background(),
 		tx,
 		shelfBlock.Id,
@@ -356,14 +356,14 @@ func TestDeleteShelfBlockTx(t *testing.T) {
 }
 
 func TestDeleteShelfBlockTxError(t *testing.T) {
-	tx, err := shelfBlockService.db.Begin()
+	tx, err := shelfService.db.Begin()
 	if err != nil {
 		t.Error(err)
 		return
 	}
 	defer tx.Rollback()
 
-	err = shelfBlockService.queries.deleteShelfBlockTx(context.Background(), tx, "non-existent-id")
+	err = shelfService.queries.deleteShelfBlockTx(context.Background(), tx, "non-existent-id")
 	if err != RowDoesNotExist {
 		t.Error(err)
 	}
@@ -442,7 +442,7 @@ func TestGetShelfBlockById(t *testing.T) {
 
 		mockShelfBlockService := &ShelfBlockService{
 			queries: mockObj,
-			db:      shelfBlockService.db,
+			db:      shelfService.db,
 		}
 
 		response, err := mockShelfBlockService.GetShelfBlockById(ctx, test.getShelfBlockByIdRequest)
@@ -474,7 +474,39 @@ func TestCreateShelfBlockById(t *testing.T) {
 
 		mockShelfBlockService := &ShelfBlockService{
 			queries: mockObj,
-			db:      shelfBlockService.db,
+			db:      shelfService.db,
+		}
+
+		response, err := mockShelfBlockService.GetShelfBlockById(ctx, test.getShelfBlockByIdRequest)
+
+		if err != test.wantErr {
+			t.Errorf("want: %v, got: %v", test.wantErr, err)
+		}
+
+		if response != test.wantResponse {
+			t.Errorf("want: %v, got: %v", test.wantResponse, response)
+		}
+	}
+}
+
+func TestUpdateShelfBlock(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockObj := NewMockshelfBlockQueries(mockCtrl)
+
+	ctx := context.Background()
+
+	for _, test := range getShelfBlockTests {
+		mockObj.EXPECT().createShelfBlockTx(
+			ctx,
+			gomock.Any(),
+			test.getShelfBlockByIdRequest,
+		).Return(test.getShelfBlockByIdTxResponse, test.getShelfBlockByIdTxErr)
+
+		mockShelfBlockService := &ShelfBlockService{
+			queries: mockObj,
+			db:      shelfService.db,
 		}
 
 		response, err := mockShelfBlockService.GetShelfBlockById(ctx, test.getShelfBlockByIdRequest)
