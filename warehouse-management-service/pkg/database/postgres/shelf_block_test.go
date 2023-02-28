@@ -182,7 +182,7 @@ func TestUpdateShelfBlockTx(t *testing.T) {
 	}
 
 	shelfBlock := wms.ShelfBlock{
-		Id:          "get_test",
+		Id:          "update_test",
 		Aisle:       "1",
 		Rack:        "1",
 		StorageType: "regular",
@@ -190,7 +190,7 @@ func TestUpdateShelfBlockTx(t *testing.T) {
 	}
 
 	shelfBlockUpdated := wms.ShelfBlock{
-		Id:          "get_test",
+		Id:          "update_test",
 		Aisle:       "2",
 		Rack:        "3",
 		StorageType: "refrigerated",
@@ -263,7 +263,7 @@ func TestUpdateShelfBlockTx(t *testing.T) {
 
 func TestUpdateShelfBlockTxError(t *testing.T) {
 	shelfBlockUpdated := wms.ShelfBlock{
-		Id:          "get_test",
+		Id:          "update_test",
 		Aisle:       "2",
 		Rack:        "3",
 		StorageType: "refrigerated",
@@ -280,6 +280,48 @@ func TestUpdateShelfBlockTxError(t *testing.T) {
 	err = shelfService.queries.updateShelfBlockTx(context.Background(), tx, shelfBlockUpdated)
 	if err == nil {
 		t.Errorf("want: %v, got: %v", "error", err)
+	}
+}
+
+func TestUpdateShelfBlockTxNoRowsError(t *testing.T) {
+	shelfBlockUpdated := wms.ShelfBlock{
+		Id:          "update_test",
+		Aisle:       "2",
+		Rack:        "3",
+		StorageType: "refrigerated",
+		WarehouseId: "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
+	}
+
+	warehouse := wms.Warehouse{
+		Id:        "85bd3b85-ad4d-4224-b589-fb2a80a6ce45",
+		Name:      "test_update_error",
+		Latitude:  12.9716,
+		Longitude: 77.5946,
+	}
+
+	tx, err := shelfService.db.Begin()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer tx.Rollback()
+	warehouseQuery := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
+	_, err = tx.ExecContext(
+		context.Background(),
+		warehouseQuery,
+		warehouse.Id,
+		warehouse.Name,
+		warehouse.Longitude,
+		warehouse.Latitude,
+	)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	err = shelfService.queries.updateShelfBlockTx(context.Background(), tx, shelfBlockUpdated)
+	if err != RowDoesNotExist {
+		t.Errorf("want: %v, got: %v", RowDoesNotExist, err)
 	}
 }
 
@@ -369,62 +411,6 @@ func TestDeleteShelfBlockTxError(t *testing.T) {
 	}
 }
 
-var getShelfBlockTests = []struct {
-	getShelfBlockByIdRequest    string
-	getShelfBlockByIdTxResponse wms.ShelfBlock
-	getShelfBlockByIdTxErr      error
-	wantResponse                wms.ShelfBlock
-	wantErr                     error
-}{
-	{
-		getShelfBlockByIdRequest: "test_get_by_id",
-		getShelfBlockByIdTxResponse: wms.ShelfBlock{
-			Id:          "test_get_by_id",
-			Aisle:       "2",
-			Rack:        "3",
-			StorageType: "regular",
-			WarehouseId: "foo",
-		},
-		getShelfBlockByIdTxErr: nil,
-		wantResponse: wms.ShelfBlock{
-			Id:          "test_get_by_id",
-			Aisle:       "2",
-			Rack:        "3",
-			StorageType: "regular",
-			WarehouseId: "foo",
-		},
-		wantErr: nil,
-	},
-	{
-		getShelfBlockByIdRequest:    "test_get_by_id",
-		getShelfBlockByIdTxResponse: wms.ShelfBlock{},
-		getShelfBlockByIdTxErr:      sql.ErrConnDone,
-		wantResponse:                wms.ShelfBlock{},
-		wantErr:                     sql.ErrConnDone,
-	},
-	{
-		getShelfBlockByIdRequest:    "test_get_by_id",
-		getShelfBlockByIdTxResponse: wms.ShelfBlock{},
-		getShelfBlockByIdTxErr:      sql.ErrNoRows,
-		wantResponse:                wms.ShelfBlock{},
-		wantErr:                     wms.ShelfBlockDoesNotExist,
-	},
-	{
-		getShelfBlockByIdRequest:    "test_get_by_id",
-		getShelfBlockByIdTxResponse: wms.ShelfBlock{},
-		getShelfBlockByIdTxErr:      sql.ErrTxDone,
-		wantResponse:                wms.ShelfBlock{},
-		wantErr:                     sql.ErrTxDone,
-	},
-	{
-		getShelfBlockByIdRequest:    "test_get_by_id",
-		getShelfBlockByIdTxResponse: wms.ShelfBlock{},
-		getShelfBlockByIdTxErr:      context.Canceled,
-		wantResponse:                wms.ShelfBlock{},
-		wantErr:                     context.Canceled,
-	},
-}
-
 func TestGetShelfBlockById(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -433,7 +419,62 @@ func TestGetShelfBlockById(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, test := range getShelfBlockTests {
+	tests := []struct {
+		getShelfBlockByIdRequest    string
+		getShelfBlockByIdTxResponse wms.ShelfBlock
+		getShelfBlockByIdTxErr      error
+		wantResponse                wms.ShelfBlock
+		wantErr                     error
+	}{
+		{
+			getShelfBlockByIdRequest: "test_get_by_id",
+			getShelfBlockByIdTxResponse: wms.ShelfBlock{
+				Id:          "test_get_by_id",
+				Aisle:       "2",
+				Rack:        "3",
+				StorageType: "regular",
+				WarehouseId: "foo",
+			},
+			getShelfBlockByIdTxErr: nil,
+			wantResponse: wms.ShelfBlock{
+				Id:          "test_get_by_id",
+				Aisle:       "2",
+				Rack:        "3",
+				StorageType: "regular",
+				WarehouseId: "foo",
+			},
+			wantErr: nil,
+		},
+		{
+			getShelfBlockByIdRequest:    "test_get_by_id",
+			getShelfBlockByIdTxResponse: wms.ShelfBlock{},
+			getShelfBlockByIdTxErr:      sql.ErrConnDone,
+			wantResponse:                wms.ShelfBlock{},
+			wantErr:                     sql.ErrConnDone,
+		},
+		{
+			getShelfBlockByIdRequest:    "test_get_by_id",
+			getShelfBlockByIdTxResponse: wms.ShelfBlock{},
+			getShelfBlockByIdTxErr:      sql.ErrNoRows,
+			wantResponse:                wms.ShelfBlock{},
+			wantErr:                     wms.ShelfBlockDoesNotExist,
+		},
+		{
+			getShelfBlockByIdRequest:    "test_get_by_id",
+			getShelfBlockByIdTxResponse: wms.ShelfBlock{},
+			getShelfBlockByIdTxErr:      sql.ErrTxDone,
+			wantResponse:                wms.ShelfBlock{},
+			wantErr:                     sql.ErrTxDone,
+		},
+		{
+			getShelfBlockByIdRequest:    "test_get_by_id",
+			getShelfBlockByIdTxResponse: wms.ShelfBlock{},
+			getShelfBlockByIdTxErr:      context.Canceled,
+			wantResponse:                wms.ShelfBlock{},
+			wantErr:                     context.Canceled,
+		},
+	}
+	for _, test := range tests {
 		mockObj.EXPECT().getShelfBlockByIdTx(
 			ctx,
 			gomock.Any(),
@@ -465,26 +506,55 @@ func TestCreateShelfBlockById(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, test := range getShelfBlockTests {
+	request := wms.ShelfBlock{
+		Id:          "test_get_by_id",
+		Aisle:       "2",
+		Rack:        "3",
+		StorageType: "regular",
+		WarehouseId: "foo",
+	}
+	tests := []struct {
+		getShelfBlockByIdRequest wms.ShelfBlock
+		getShelfBlockByIdTxErr   error
+		wantErr                  error
+	}{
+		{
+			getShelfBlockByIdTxErr: nil,
+			wantErr:                nil,
+		},
+		{
+			getShelfBlockByIdTxErr: sql.ErrConnDone,
+			wantErr:                sql.ErrConnDone,
+		},
+		{
+			getShelfBlockByIdTxErr: InvalidWarehouse,
+			wantErr:                wms.InvalidWarehouse,
+		},
+		{
+			getShelfBlockByIdTxErr: sql.ErrTxDone,
+			wantErr:                sql.ErrTxDone,
+		},
+		{
+			getShelfBlockByIdTxErr: context.Canceled,
+			wantErr:                context.Canceled,
+		},
+	}
+	for _, test := range tests {
 		mockObj.EXPECT().createShelfBlockTx(
 			ctx,
 			gomock.Any(),
-			test.getShelfBlockByIdRequest,
-		).Return(test.getShelfBlockByIdTxResponse, test.getShelfBlockByIdTxErr)
+			request,
+		).Return(test.getShelfBlockByIdTxErr)
 
 		mockShelfBlockService := &ShelfBlockService{
 			queries: mockObj,
 			db:      shelfService.db,
 		}
 
-		response, err := mockShelfBlockService.GetShelfBlockById(ctx, test.getShelfBlockByIdRequest)
+		err := mockShelfBlockService.CreateShelfBlock(ctx, request)
 
 		if err != test.wantErr {
 			t.Errorf("want: %v, got: %v", test.wantErr, err)
-		}
-
-		if response != test.wantResponse {
-			t.Errorf("want: %v, got: %v", test.wantResponse, response)
 		}
 	}
 }
@@ -497,26 +567,113 @@ func TestUpdateShelfBlock(t *testing.T) {
 
 	ctx := context.Background()
 
-	for _, test := range getShelfBlockTests {
-		mockObj.EXPECT().createShelfBlockTx(
+	request := wms.ShelfBlock{
+		Id:          "test_get_by_id",
+		Aisle:       "2",
+		Rack:        "3",
+		StorageType: "regular",
+		WarehouseId: "foo",
+	}
+	tests := []struct {
+		getShelfBlockByIdRequest wms.ShelfBlock
+		getShelfBlockByIdTxErr   error
+		wantErr                  error
+	}{
+		{
+			getShelfBlockByIdTxErr: nil,
+			wantErr:                nil,
+		},
+		{
+			getShelfBlockByIdTxErr: sql.ErrConnDone,
+			wantErr:                sql.ErrConnDone,
+		},
+		{
+			getShelfBlockByIdTxErr: InvalidWarehouse,
+			wantErr:                wms.InvalidWarehouse,
+		},
+		{
+			getShelfBlockByIdTxErr: RowDoesNotExist,
+			wantErr:                wms.ShelfBlockDoesNotExist,
+		},
+		{
+			getShelfBlockByIdTxErr: sql.ErrTxDone,
+			wantErr:                sql.ErrTxDone,
+		},
+		{
+			getShelfBlockByIdTxErr: context.Canceled,
+			wantErr:                context.Canceled,
+		},
+	}
+	for _, test := range tests {
+		mockObj.EXPECT().updateShelfBlockTx(
 			ctx,
 			gomock.Any(),
-			test.getShelfBlockByIdRequest,
-		).Return(test.getShelfBlockByIdTxResponse, test.getShelfBlockByIdTxErr)
+			request,
+		).Return(test.getShelfBlockByIdTxErr)
 
 		mockShelfBlockService := &ShelfBlockService{
 			queries: mockObj,
 			db:      shelfService.db,
 		}
 
-		response, err := mockShelfBlockService.GetShelfBlockById(ctx, test.getShelfBlockByIdRequest)
+		err := mockShelfBlockService.UpdateShelfBlock(ctx, request)
 
 		if err != test.wantErr {
 			t.Errorf("want: %v, got: %v", test.wantErr, err)
 		}
+	}
+}
 
-		if response != test.wantResponse {
-			t.Errorf("want: %v, got: %v", test.wantResponse, response)
+func TestDeleteShelfBlock(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockObj := NewMockshelfBlockQueries(mockCtrl)
+
+	ctx := context.Background()
+
+	request := "test_delete"
+	tests := []struct {
+		getShelfBlockByIdTxErr error
+		wantErr                error
+	}{
+		{
+			getShelfBlockByIdTxErr: nil,
+			wantErr:                nil,
+		},
+		{
+			getShelfBlockByIdTxErr: sql.ErrConnDone,
+			wantErr:                sql.ErrConnDone,
+		},
+		{
+			getShelfBlockByIdTxErr: RowDoesNotExist,
+			wantErr:                wms.ShelfBlockDoesNotExist,
+		},
+		{
+			getShelfBlockByIdTxErr: sql.ErrTxDone,
+			wantErr:                sql.ErrTxDone,
+		},
+		{
+			getShelfBlockByIdTxErr: context.Canceled,
+			wantErr:                context.Canceled,
+		},
+	}
+	for _, test := range tests {
+		mockObj.EXPECT().deleteShelfBlockTx(
+			ctx,
+			gomock.Any(),
+			request,
+		).Return(test.getShelfBlockByIdTxErr)
+
+		mockShelfBlockService := &ShelfBlockService{
+			queries: mockObj,
+			db:      shelfService.db,
+		}
+
+		err := mockShelfBlockService.DeleteShelfBlockById(ctx, request)
+
+		if err != test.wantErr {
+			t.Errorf("want: %v, got: %v", test.wantErr, err)
 		}
 	}
 }

@@ -105,7 +105,8 @@ func (s *ShelfBlockService) DeleteShelfBlockById(ctx context.Context, id string)
 }
 
 func (s *shelfBlockQueriesImpl) createShelfBlockTx(ctx context.Context, tx *sql.Tx, block wms.ShelfBlock) error {
-	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId); err != nil {
+	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId);
+		err != nil {
 		return err
 	} else if !warehouseExists {
 		return InvalidWarehouse
@@ -138,7 +139,8 @@ func (s *shelfBlockQueriesImpl) getShelfBlockByIdTx(ctx context.Context, tx *sql
 }
 
 func (s *shelfBlockQueriesImpl) updateShelfBlockTx(ctx context.Context, tx *sql.Tx, block wms.ShelfBlock) error {
-	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId); err != nil {
+	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId);
+		err != nil {
 		return err
 	} else if !warehouseExists {
 		return InvalidWarehouse

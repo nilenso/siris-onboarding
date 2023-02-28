@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -250,7 +249,7 @@ func (h *handler) GetShelfBlock(w http.ResponseWriter, r *http.Request) {
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.GetShelfBlockResponse{Error: fmt.Sprintf(
-				"falied to get, shelfBlock: %s does not exist",
+				"failed to get, shelfBlock: %s does not exist",
 				shelfBlockId,
 			)})
 		}
@@ -272,7 +271,8 @@ func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
 	if r.Body == nil {
 		err := fmt.Errorf("request body cannot be empty")
 		h.logger.Log(log.Error, err)
-		h.response(w, http.StatusBadRequest, err)
+		h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{
+			Error: err.Error()})
 		return
 	}
 
@@ -282,8 +282,17 @@ func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Log(log.Error, err)
 		h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{
-			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
+			Error: "Failed to parse request"})
+		return
 	}
+
+	if err, ok := createShelfBlockRequest.IsValid(); !ok {
+		h.logger.Log(log.Error, err)
+		h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{
+			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
+		return
+	}
+
 	shelfBlock := warehousemanagementservice.NewShelfBlock(
 		createShelfBlockRequest.Aisle,
 		createShelfBlockRequest.Rack,
@@ -304,7 +313,7 @@ func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{Error: fmt.Sprintf("%s: %s",
 				err.Error(),
-				shelfBlock.Id,
+				shelfBlock.WarehouseId,
 			)})
 		}
 	default:
@@ -325,7 +334,11 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 	if r.Body == nil {
 		err := fmt.Errorf("request body cannot be empty")
 		h.logger.Log(log.Error, err)
-		h.response(w, http.StatusBadRequest, err)
+		h.response(
+			w,
+			http.StatusBadRequest,
+			api.ShelfBlockResponse{Error: err.Error()},
+		)
 		return
 	}
 
@@ -335,7 +348,18 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.logger.Log(log.Error, err)
 		h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{
-			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
+			Error: "Failed to parse request",
+		})
+		return
+	}
+
+	if err, ok := updateShelfBlockRequest.IsValid(); !ok {
+		h.logger.Log(log.Error, err)
+		h.response(
+			w,
+			http.StatusBadRequest,
+			api.ShelfBlockResponse{Error: fmt.Sprintf("Invalid input: %v", err.Error())},
+		)
 		return
 	}
 
@@ -359,17 +383,16 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.ShelfBlockResponse{Error: fmt.Sprintf(
-				"falied to update, warehouse: %s does not exist",
+				"failed to update, shelf_block: %s does not exist",
 				updateShelfBlockRequest.Id,
 			)})
-			return
 		}
 	case warehousemanagementservice.InvalidWarehouse:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{Error: fmt.Sprintf("%s: %s",
 				err.Error(),
-				shelfBlock.Id,
+				shelfBlock.WarehouseId,
 			)})
 		}
 	default:
@@ -378,11 +401,10 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 			h.response(
 				w,
 				http.StatusInternalServerError,
-				api.ShelfBlockResponse{Error: "Failed to update shelf block"},
+				api.ShelfBlockResponse{Error: "Failed to update shelf_block"},
 			)
 		}
 	}
-
 }
 
 func (h *handler) DeleteShelfBlock(w http.ResponseWriter, r *http.Request) {
@@ -401,16 +423,7 @@ func (h *handler) DeleteShelfBlock(w http.ResponseWriter, r *http.Request) {
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.ShelfBlockResponse{Error: fmt.Sprintf(
-				"falied to delete, shelf block: %s does not exist",
-				shelfBlockId,
-			)})
-			return
-		}
-	case context.Canceled:
-		{
-			h.logger.Log(log.Error, err)
-			h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{Error: fmt.Sprintf(
-				"falied to delete, shelf block: %s does not exist",
+				"failed to delete, shelf_block: %s does not exist",
 				shelfBlockId,
 			)})
 			return
@@ -421,7 +434,7 @@ func (h *handler) DeleteShelfBlock(w http.ResponseWriter, r *http.Request) {
 				w,
 				http.StatusOK,
 				api.ShelfBlockResponse{Response: fmt.Sprintf(
-					"Successfully deleted shelf block: %s",
+					"Successfully deleted shelf_block: %s",
 					shelfBlockId,
 				)},
 			)
@@ -432,7 +445,7 @@ func (h *handler) DeleteShelfBlock(w http.ResponseWriter, r *http.Request) {
 			h.response(
 				w,
 				http.StatusInternalServerError,
-				api.ShelfBlockResponse{Error: "Failed to delete shelf block"},
+				api.ShelfBlockResponse{Error: "Failed to delete shelf_block"},
 			)
 			return
 		}
