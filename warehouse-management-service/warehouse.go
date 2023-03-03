@@ -38,10 +38,6 @@ func NewWarehouse(name string, latitude float64, longitude float64) *Warehouse {
 	}
 }
 
-func (w *Warehouse) SetID() {
-	w.Id = generateUUID()
-}
-
 func generateUUID() string {
 	return uuid.New().String()
 }
