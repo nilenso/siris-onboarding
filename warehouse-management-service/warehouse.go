@@ -3,7 +3,6 @@ package warehousemanagementservice
 import (
 	"context"
 	"errors"
-	"github.com/google/uuid"
 )
 
 type Warehouse struct {
@@ -11,12 +10,6 @@ type Warehouse struct {
 	Name      string
 	Latitude  float64
 	Longitude float64
-}
-
-type WarehouseUpdate struct {
-	Name      string  `json:"name"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
 }
 
 var WarehouseDoesNotExist = errors.New("warehouse does not exist")
@@ -36,8 +29,4 @@ func NewWarehouse(name string, latitude float64, longitude float64) *Warehouse {
 		Latitude:  latitude,
 		Longitude: longitude,
 	}
-}
-
-func generateUUID() string {
-	return uuid.New().String()
 }
