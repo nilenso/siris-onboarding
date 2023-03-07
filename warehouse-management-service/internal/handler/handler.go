@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"gopkg.in/validator.v2"
 	"net/http"
 	warehousemanagementservice "warehouse-management-service"
 	"warehouse-management-service/pkg/api"
@@ -93,7 +94,8 @@ func (h *handler) CreateWarehouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err, ok := createWarehouseRequest.IsValid(); !ok {
+	err = validator.Validate(createWarehouseRequest)
+	if err != nil {
 		h.logger.Log(log.Error, err)
 		h.response(w, http.StatusBadRequest, api.WarehouseResponse{
 			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
@@ -142,7 +144,8 @@ func (h *handler) UpdateWarehouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err, ok := updateWarehouseRequest.IsValid(); !ok {
+	err = validator.Validate(updateWarehouseRequest)
+	if err != nil {
 		h.logger.Log(log.Error, err)
 		h.response(w, http.StatusBadRequest, api.WarehouseResponse{
 			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
@@ -286,7 +289,8 @@ func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err, ok := createShelfBlockRequest.IsValid(); !ok {
+	err = validator.Validate(createShelfBlockRequest)
+	if err != nil {
 		h.logger.Log(log.Error, err)
 		h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{
 			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
@@ -353,13 +357,11 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err, ok := updateShelfBlockRequest.IsValid(); !ok {
+	err = validator.Validate(updateShelfBlockRequest)
+	if err != nil {
 		h.logger.Log(log.Error, err)
-		h.response(
-			w,
-			http.StatusBadRequest,
-			api.ShelfBlockResponse{Error: fmt.Sprintf("Invalid input: %v", err.Error())},
-		)
+		h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{
+			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
 		return
 	}
 
