@@ -21,7 +21,7 @@ type WarehouseService interface {
 }
 
 // mockgen -source="./shelf_block.go" -destination="./internal/handler/mock/shelf_block.go"
-type ShelfService interface {
+type ShelfBlockService interface {
 	GetShelfBlockById(ctx context.Context, id string) (wms.ShelfBlock, error)
 	CreateShelfBlock(ctx context.Context, shelfBlock wms.ShelfBlock) error
 	UpdateShelfBlock(ctx context.Context, shelfBlock wms.ShelfBlock) error
@@ -29,20 +29,20 @@ type ShelfService interface {
 }
 
 type handler struct {
-	warehouseService WarehouseService
-	shelfService     ShelfService
-	logger           log.Logger
+	warehouseService  WarehouseService
+	shelfBlockService ShelfBlockService
+	logger            log.Logger
 }
 
 func New(
 	logger log.Logger,
 	warehouseService WarehouseService,
-	shelfService ShelfService,
+	shelfBlockService ShelfBlockService,
 ) http.Handler {
 	handler := &handler{
-		logger:           logger,
-		warehouseService: warehouseService,
-		shelfService:     shelfService,
+		logger:            logger,
+		warehouseService:  warehouseService,
+		shelfBlockService: shelfBlockService,
 	}
 	return handler.router()
 }
@@ -169,7 +169,7 @@ func (h *handler) UpdateWarehouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.warehouseService.UpdateWarehouse(r.Context(), &wms.Warehouse{
+	err = h.warehouseService.UpdateWarehouse(r.Context(), &wms.Warehouse{
 		Id:        updateWarehouseRequest.Id,
 		Name:      updateWarehouseRequest.Name,
 		Latitude:  updateWarehouseRequest.Latitude,
@@ -263,7 +263,7 @@ func (h *handler) GetShelfBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shelfBlock, err := h.shelfService.GetShelfBlockById(r.Context(), shelfBlockId)
+	shelfBlock, err := h.shelfBlockService.GetShelfBlockById(r.Context(), shelfBlockId)
 	switch err {
 	case wms.ShelfBlockDoesNotExist:
 		{
@@ -320,7 +320,7 @@ func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
 		createShelfBlockRequest.StorageType,
 		createShelfBlockRequest.WarehouseId)
 
-	err = h.shelfService.CreateShelfBlock(r.Context(), shelfBlock)
+	err = h.shelfBlockService.CreateShelfBlock(r.Context(), shelfBlock)
 	switch err {
 	case nil:
 		{
@@ -389,7 +389,7 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 		StorageType: updateShelfBlockRequest.StorageType,
 		WarehouseId: updateShelfBlockRequest.WarehouseId,
 	}
-	err = h.shelfService.UpdateShelfBlock(r.Context(), shelfBlock)
+	err = h.shelfBlockService.UpdateShelfBlock(r.Context(), shelfBlock)
 	switch err {
 	case nil:
 		{
@@ -436,7 +436,7 @@ func (h *handler) DeleteShelfBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.shelfService.DeleteShelfBlockById(r.Context(), shelfBlockId)
+	err := h.shelfBlockService.DeleteShelfBlockById(r.Context(), shelfBlockId)
 	switch err {
 	case wms.ShelfBlockDoesNotExist:
 		{

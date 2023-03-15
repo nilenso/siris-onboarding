@@ -12,31 +12,31 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockShelfService is a mock of ShelfService interface.
-type MockShelfService struct {
+// MockShelfBlockService is a mock of ShelfBlockService interface.
+type MockShelfBlockService struct {
 	ctrl     *gomock.Controller
-	recorder *MockShelfServiceMockRecorder
+	recorder *MockShelfBlockServiceMockRecorder
 }
 
-// MockShelfServiceMockRecorder is the mock recorder for MockShelfService.
-type MockShelfServiceMockRecorder struct {
-	mock *MockShelfService
+// MockShelfBlockServiceMockRecorder is the mock recorder for MockShelfBlockService.
+type MockShelfBlockServiceMockRecorder struct {
+	mock *MockShelfBlockService
 }
 
-// NewMockShelfService creates a new mock instance.
-func NewMockShelfService(ctrl *gomock.Controller) *MockShelfService {
-	mock := &MockShelfService{ctrl: ctrl}
-	mock.recorder = &MockShelfServiceMockRecorder{mock}
+// NewMockShelfBlockService creates a new mock instance.
+func NewMockShelfBlockService(ctrl *gomock.Controller) *MockShelfBlockService {
+	mock := &MockShelfBlockService{ctrl: ctrl}
+	mock.recorder = &MockShelfBlockServiceMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockShelfService) EXPECT() *MockShelfServiceMockRecorder {
+func (m *MockShelfBlockService) EXPECT() *MockShelfBlockServiceMockRecorder {
 	return m.recorder
 }
 
 // CreateShelfBlock mocks base method.
-func (m *MockShelfService) CreateShelfBlock(ctx context.Context, shelfBlock warehousemanagementservice.ShelfBlock) error {
+func (m *MockShelfBlockService) CreateShelfBlock(ctx context.Context, shelfBlock warehousemanagementservice.ShelfBlock) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateShelfBlock", ctx, shelfBlock)
 	ret0, _ := ret[0].(error)
@@ -44,13 +44,13 @@ func (m *MockShelfService) CreateShelfBlock(ctx context.Context, shelfBlock ware
 }
 
 // CreateShelfBlock indicates an expected call of CreateShelfBlock.
-func (mr *MockShelfServiceMockRecorder) CreateShelfBlock(ctx, shelfBlock interface{}) *gomock.Call {
+func (mr *MockShelfBlockServiceMockRecorder) CreateShelfBlock(ctx, shelfBlock interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateShelfBlock", reflect.TypeOf((*MockShelfService)(nil).CreateShelfBlock), ctx, shelfBlock)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateShelfBlock", reflect.TypeOf((*MockShelfBlockService)(nil).CreateShelfBlock), ctx, shelfBlock)
 }
 
 // DeleteShelfBlockById mocks base method.
-func (m *MockShelfService) DeleteShelfBlockById(ctx context.Context, id string) error {
+func (m *MockShelfBlockService) DeleteShelfBlockById(ctx context.Context, id string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "DeleteShelfBlockById", ctx, id)
 	ret0, _ := ret[0].(error)
@@ -58,13 +58,13 @@ func (m *MockShelfService) DeleteShelfBlockById(ctx context.Context, id string) 
 }
 
 // DeleteShelfBlockById indicates an expected call of DeleteShelfBlockById.
-func (mr *MockShelfServiceMockRecorder) DeleteShelfBlockById(ctx, id interface{}) *gomock.Call {
+func (mr *MockShelfBlockServiceMockRecorder) DeleteShelfBlockById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteShelfBlockById", reflect.TypeOf((*MockShelfService)(nil).DeleteShelfBlockById), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteShelfBlockById", reflect.TypeOf((*MockShelfBlockService)(nil).DeleteShelfBlockById), ctx, id)
 }
 
 // GetShelfBlockById mocks base method.
-func (m *MockShelfService) GetShelfBlockById(ctx context.Context, id string) (warehousemanagementservice.ShelfBlock, error) {
+func (m *MockShelfBlockService) GetShelfBlockById(ctx context.Context, id string) (warehousemanagementservice.ShelfBlock, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetShelfBlockById", ctx, id)
 	ret0, _ := ret[0].(warehousemanagementservice.ShelfBlock)
@@ -73,13 +73,13 @@ func (m *MockShelfService) GetShelfBlockById(ctx context.Context, id string) (wa
 }
 
 // GetShelfBlockById indicates an expected call of GetShelfBlockById.
-func (mr *MockShelfServiceMockRecorder) GetShelfBlockById(ctx, id interface{}) *gomock.Call {
+func (mr *MockShelfBlockServiceMockRecorder) GetShelfBlockById(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShelfBlockById", reflect.TypeOf((*MockShelfService)(nil).GetShelfBlockById), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShelfBlockById", reflect.TypeOf((*MockShelfBlockService)(nil).GetShelfBlockById), ctx, id)
 }
 
 // UpdateShelfBlock mocks base method.
-func (m *MockShelfService) UpdateShelfBlock(ctx context.Context, shelfBlock warehousemanagementservice.ShelfBlock) error {
+func (m *MockShelfBlockService) UpdateShelfBlock(ctx context.Context, shelfBlock warehousemanagementservice.ShelfBlock) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateShelfBlock", ctx, shelfBlock)
 	ret0, _ := ret[0].(error)
@@ -87,7 +87,7 @@ func (m *MockShelfService) UpdateShelfBlock(ctx context.Context, shelfBlock ware
 }
 
 // UpdateShelfBlock indicates an expected call of UpdateShelfBlock.
-func (mr *MockShelfServiceMockRecorder) UpdateShelfBlock(ctx, shelfBlock interface{}) *gomock.Call {
+func (mr *MockShelfBlockServiceMockRecorder) UpdateShelfBlock(ctx, shelfBlock interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateShelfBlock", reflect.TypeOf((*MockShelfService)(nil).UpdateShelfBlock), ctx, shelfBlock)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateShelfBlock", reflect.TypeOf((*MockShelfBlockService)(nil).UpdateShelfBlock), ctx, shelfBlock)
 }

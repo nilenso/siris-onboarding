@@ -42,7 +42,7 @@ func TestMain(m *testing.M) {
 	}
 
 	warehouseService = NewWarehouseService(db)
-	shelfService = NewShelfService(db)
+	shelfService = NewShelfBlockService(db)
 
 	mockDB, err := postgres.Open()
 	if err != nil {

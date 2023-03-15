@@ -25,7 +25,7 @@ type ShelfBlockService struct {
 
 var InvalidWarehouse = errors.New("invalid warehouseId")
 
-func NewShelfService(db *sql.DB) *ShelfBlockService {
+func NewShelfBlockService(db *sql.DB) *ShelfBlockService {
 	return &ShelfBlockService{
 		queries: new(shelfBlockQueriesImpl),
 		db:      db,

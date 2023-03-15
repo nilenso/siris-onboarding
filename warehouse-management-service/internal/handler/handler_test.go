@@ -548,7 +548,7 @@ func TestGetShelfBlockById(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockObj := mock.NewMockShelfService(mockCtrl)
+	mockObj := mock.NewMockShelfBlockService(mockCtrl)
 
 	tests := []struct {
 		getShelfBlockByIdRequest string
@@ -585,7 +585,7 @@ func TestGetShelfBlockById(t *testing.T) {
 	for _, test := range tests {
 
 		mockObj.EXPECT().GetShelfBlockById(gomock.Any(), test.getShelfBlockByIdRequest).Return(test.shelfBlockByIdResponse, test.shelfBlockByIdErr)
-		h.shelfService = mockObj
+		h.shelfBlockService = mockObj
 
 		requestURL := fmt.Sprintf("/shelf_block/%s", test.getShelfBlockByIdRequest)
 		request, err := http.NewRequest(
@@ -619,7 +619,7 @@ func TestCreateShelfBlock(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockObj := mock.NewMockShelfService(mockCtrl)
+	mockObj := mock.NewMockShelfBlockService(mockCtrl)
 
 	tests := []struct {
 		createShelfBlockRequest api.CreateShelfBlockRequest
@@ -672,7 +672,7 @@ func TestCreateShelfBlock(t *testing.T) {
 			gomock.Any(),
 			gomock.Any(),
 		).Return(test.createShelfBlockErr)
-		h.shelfService = mockObj
+		h.shelfBlockService = mockObj
 
 		marshalledRequest, err := json.Marshal(test.createShelfBlockRequest)
 		if err != nil {
@@ -785,7 +785,7 @@ func TestUpdateShelfBlock(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockObj := mock.NewMockShelfService(mockCtrl)
+	mockObj := mock.NewMockShelfBlockService(mockCtrl)
 
 	request := api.UpdateShelfBlockRequest{
 		Id:          "8387eec6-040a-4eb8-b1b5-9277b2d1a72c",
@@ -843,7 +843,7 @@ func TestUpdateShelfBlock(t *testing.T) {
 			},
 		).Return(test.updateShelfBlockErr)
 
-		h.shelfService = mockObj
+		h.shelfBlockService = mockObj
 
 		marshalledRequest, err := json.Marshal(request)
 		if err != nil {
@@ -967,7 +967,7 @@ func TestDeleteShelfBlock(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 
-	mockObj := mock.NewMockShelfService(mockCtrl)
+	mockObj := mock.NewMockShelfBlockService(mockCtrl)
 
 	tests := []struct {
 		deleteShelfBlockRequest string
@@ -1003,7 +1003,7 @@ func TestDeleteShelfBlock(t *testing.T) {
 	for _, test := range tests {
 
 		mockObj.EXPECT().DeleteShelfBlockById(gomock.Any(), test.deleteShelfBlockRequest).Return(test.deleteShelfBlockErr)
-		h.shelfService = mockObj
+		h.shelfBlockService = mockObj
 
 		requestURL := fmt.Sprintf("/shelf_block/%s", test.deleteShelfBlockRequest)
 		request, err := http.NewRequest(
