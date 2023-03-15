@@ -1033,6 +1033,353 @@ func TestDeleteShelfBlock(t *testing.T) {
 	}
 }
 
+func TestGetShelfById(t *testing.T) {
+	shelf := warehousemanagementservice.Shelf{
+		Id:           "get_handler_test",
+		Label:        "12A",
+		Section:      "A",
+		Level:        "12",
+		ShelfBlockId: "863e835b-a05b-4554-b0af-a45389ebbb78",
+	}
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockObj := mock.NewMockShelfService(mockCtrl)
+
+	tests := []struct {
+		getShelfByIdRequest string
+		shelfByIdResponse   warehousemanagementservice.Shelf
+		shelfByIdErr        error
+		wantStatusCode      int
+		wantResponse        interface{}
+	}{
+		{
+			getShelfByIdRequest: shelf.Id,
+			shelfByIdResponse:   shelf,
+			shelfByIdErr:        nil,
+			wantStatusCode:      http.StatusOK,
+			wantResponse:        api.ShelfResponse{Response: shelf},
+		},
+		{
+			getShelfByIdRequest: shelf.Id,
+			shelfByIdResponse:   warehousemanagementservice.Shelf{},
+			shelfByIdErr:        sql.ErrConnDone,
+			wantStatusCode:      http.StatusInternalServerError,
+			wantResponse:        api.ShelfResponse{Error: "Failed to get shelf"},
+		},
+		{
+			getShelfByIdRequest: shelf.Id,
+			shelfByIdResponse:   warehousemanagementservice.Shelf{},
+			shelfByIdErr:        warehousemanagementservice.ShelfDoesNotExist,
+			wantStatusCode:      http.StatusNotFound,
+			wantResponse: api.ShelfResponse{Error: fmt.Sprintf(
+				"failed to get, shelf: %s does not exist",
+				shelf.Id,
+			)},
+		},
+	}
+
+	for _, test := range tests {
+
+		mockObj.EXPECT().GetShelfById(
+			gomock.Any(),
+			test.getShelfByIdRequest,
+		).Return(test.shelfByIdResponse, test.shelfByIdErr)
+		h.shelfService = mockObj
+
+		requestURL := fmt.Sprintf("/shelf/%s", test.getShelfByIdRequest)
+		request, err := http.NewRequest(
+			"GET",
+			requestURL,
+			nil,
+		)
+		if err != nil {
+			t.Error(err)
+		}
+
+		response := executeRequest(request)
+		responseBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Error(err)
+		}
+		var got api.ShelfResponse
+		err = json.Unmarshal(responseBody, &got)
+
+		if response.StatusCode != test.wantStatusCode {
+			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
+		}
+
+		if got != test.wantResponse {
+			t.Errorf("want: %v, got: %v", test.wantResponse, got)
+		}
+	}
+}
+
+func TestCreateShelf(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockObj := mock.NewMockShelfService(mockCtrl)
+
+	tests := []struct {
+		createShelfRequest api.CreateShelfRequest
+		createShelfErr     error
+		wantStatusCode     int
+		wantResponse       api.ShelfResponse
+	}{
+		{
+			createShelfRequest: api.CreateShelfRequest{
+				Label:        "12A",
+				Section:      "A",
+				Level:        "12",
+				ShelfBlockId: "863e835b-a05b-4554-b0af-a45389ebbb78",
+			},
+			createShelfErr: nil,
+			wantStatusCode: http.StatusOK,
+			wantResponse: api.ShelfResponse{
+				Message: "Successfully created shelf: ",
+			},
+		},
+		{
+			createShelfRequest: api.CreateShelfRequest{
+				Label:        "12A",
+				Section:      "A",
+				Level:        "12",
+				ShelfBlockId: "863e835b-a05b-4554-b0af-a45389ebbb78",
+			},
+			createShelfErr: sql.ErrConnDone,
+			wantStatusCode: http.StatusInternalServerError,
+			wantResponse:   api.ShelfResponse{Error: "Failed to create shelf"},
+		},
+		{
+			createShelfRequest: api.CreateShelfRequest{
+				Label:        "12A",
+				Section:      "A",
+				Level:        "12",
+				ShelfBlockId: "xx",
+			},
+			createShelfErr: warehousemanagementservice.InvalidShelfBlock,
+			wantStatusCode: http.StatusBadRequest,
+			wantResponse: api.ShelfResponse{Error: fmt.Sprintf("%s: %s",
+				warehousemanagementservice.InvalidShelfBlock.Error(),
+				"xx",
+			)},
+		},
+	}
+
+	for _, test := range tests {
+
+		mockObj.EXPECT().CreateShelf(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(test.createShelfErr)
+		h.shelfService = mockObj
+
+		marshalledRequest, err := json.Marshal(test.createShelfRequest)
+		if err != nil {
+			t.Error(err)
+		}
+		requestBody := bytes.NewBuffer(marshalledRequest)
+		request, err := http.NewRequest(
+			"POST",
+			"/shelf",
+			requestBody,
+		)
+		if err != nil {
+			t.Error(err)
+		}
+
+		response := executeRequest(request)
+		responseBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Error(err)
+		}
+		var got api.ShelfResponse
+		err = json.Unmarshal(responseBody, &got)
+
+		if response.StatusCode != test.wantStatusCode {
+			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
+		}
+
+		if got.Error != test.wantResponse.Error {
+			t.Errorf("want: %v, got: %v", test.wantResponse, got)
+		}
+
+		if !strings.HasPrefix(got.Message, test.wantResponse.Message) {
+			t.Errorf("want: %v, got: %v", test.wantResponse.Message, got.Message)
+		}
+	}
+}
+
+func TestUpdateShelf(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockObj := mock.NewMockShelfService(mockCtrl)
+
+	request := warehousemanagementservice.Shelf{
+		Id:           "00c4e998-41df-40d1-ba1e-0bdf870bcc5c",
+		Label:        "12A",
+		Section:      "A",
+		Level:        "12",
+		ShelfBlockId: "863e835b-a05b-4554-b0af-a45389ebbb78",
+	}
+
+	tests := []struct {
+		updateShelfErr      error
+		updateShelfResponse api.ShelfResponse
+		wantStatusCode      int
+	}{
+		{
+			updateShelfErr: nil,
+			updateShelfResponse: api.ShelfResponse{Message: fmt.Sprintf(
+				"Successfully updated shelf: %s",
+				"00c4e998-41df-40d1-ba1e-0bdf870bcc5c",
+			)},
+			wantStatusCode: http.StatusOK,
+		},
+		{
+			updateShelfErr:      sql.ErrConnDone,
+			updateShelfResponse: api.ShelfResponse{Error: "Failed to update shelf"},
+			wantStatusCode:      http.StatusInternalServerError,
+		},
+		{
+			updateShelfErr: warehousemanagementservice.ShelfDoesNotExist,
+			updateShelfResponse: api.ShelfResponse{Error: fmt.Sprintf(
+				"failed to update, shelf: %s does not exist",
+				"00c4e998-41df-40d1-ba1e-0bdf870bcc5c",
+			)},
+			wantStatusCode: http.StatusNotFound,
+		},
+		{
+			updateShelfErr: warehousemanagementservice.InvalidShelfBlock,
+			updateShelfResponse: api.ShelfResponse{Error: fmt.Sprintf("%s: %s",
+				warehousemanagementservice.InvalidShelfBlock.Error(),
+				"863e835b-a05b-4554-b0af-a45389ebbb78",
+			)},
+			wantStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, test := range tests {
+		mockObj.EXPECT().UpdateShelf(
+			gomock.Any(),
+			warehousemanagementservice.Shelf{
+				Id:           request.Id,
+				Label:        request.Label,
+				Section:      request.Section,
+				Level:        request.Level,
+				ShelfBlockId: request.ShelfBlockId,
+			},
+		).Return(test.updateShelfErr)
+
+		h.shelfService = mockObj
+
+		marshalledRequest, err := json.Marshal(request)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		requestBody := bytes.NewBuffer(marshalledRequest)
+		request, err := http.NewRequest(
+			"PUT",
+			"/shelf",
+			requestBody,
+		)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		response := executeRequest(request)
+		responseBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+		var got api.ShelfResponse
+		err = json.Unmarshal(responseBody, &got)
+
+		if response.StatusCode != test.wantStatusCode {
+			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
+		}
+
+		if got.Error != test.updateShelfResponse.Error {
+			t.Errorf("want: %v, got: %v", test.updateShelfResponse, got)
+		}
+	}
+}
+
+func TestDeleteShelf(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockObj := mock.NewMockShelfService(mockCtrl)
+	tests := []struct {
+		deleteShelfRequest string
+		deleteShelfErr     error
+		wantStatusCode     int
+		wantResponse       api.ShelfResponse
+	}{
+		{
+			deleteShelfRequest: "8387eec6-040a-4eb8-b1b5-9277b2d1a72c",
+			deleteShelfErr:     nil,
+			wantStatusCode:     http.StatusOK,
+			wantResponse: api.ShelfResponse{Message: fmt.Sprintf(
+				"Successfully deleted shelf: %s",
+				"8387eec6-040a-4eb8-b1b5-9277b2d1a72c",
+			)},
+		},
+		{
+			deleteShelfRequest: "8387eec6-040a-4eb8-b1b5-9277b2d1a72c",
+			deleteShelfErr:     sql.ErrConnDone,
+			wantStatusCode:     http.StatusInternalServerError,
+			wantResponse:       api.ShelfResponse{Error: "Failed to delete shelf"},
+		},
+		{
+			deleteShelfRequest: "8387eec6-040a-4eb8-b1b5-9277b2d1a72c",
+			deleteShelfErr:     warehousemanagementservice.ShelfDoesNotExist,
+			wantStatusCode:     http.StatusNotFound,
+			wantResponse: api.ShelfResponse{Error: fmt.Sprintf(
+				"failed to delete, shelf: %s does not exist",
+				"8387eec6-040a-4eb8-b1b5-9277b2d1a72c",
+			)},
+		},
+	}
+
+	for _, test := range tests {
+
+		mockObj.EXPECT().DeleteShelfById(gomock.Any(), test.deleteShelfRequest).Return(test.deleteShelfErr)
+		h.shelfService = mockObj
+
+		requestURL := fmt.Sprintf("/shelf/%s", test.deleteShelfRequest)
+		request, err := http.NewRequest(
+			"DELETE",
+			requestURL,
+			nil,
+		)
+		if err != nil {
+			t.Error(err)
+		}
+
+		response := executeRequest(request)
+		responseBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Error(err)
+		}
+		var got api.ShelfResponse
+		err = json.Unmarshal(responseBody, &got)
+
+		if response.StatusCode != test.wantStatusCode {
+			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
+		}
+
+		if got != test.wantResponse {
+			t.Errorf("want: %v, got: %v", test.wantResponse, got)
+		}
+	}
+}
+
 func executeRequest(request *http.Request) *http.Response {
 	responseRecorder := httptest.NewRecorder()
 
