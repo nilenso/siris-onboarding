@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS product(
     variant TEXT,
     length_in_cm NUMERIC,
     width_in_cm NUMERIC,
-    breadth_in_cm NUMERIC,
+    height_in_cm NUMERIC,
     weight_in_kg NUMERIC,
     perishable BOOLEAN NOT NULL
 );
