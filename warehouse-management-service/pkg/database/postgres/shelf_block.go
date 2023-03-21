@@ -37,6 +37,7 @@ func (s *ShelfBlockService) GetShelfBlockById(ctx context.Context, id string) (w
 	if err != nil {
 		return wms.ShelfBlock{}, err
 	}
+	defer tx.Rollback()
 
 	shelfBlock, err := s.queries.getShelfBlockByIdTx(ctx, tx, id)
 	switch err {
