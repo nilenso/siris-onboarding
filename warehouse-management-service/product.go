@@ -1,6 +1,9 @@
 package warehousemanagementservice
 
-import "context"
+import (
+	"context"
+	"errors"
+)
 
 type Product struct {
 	SKU        string  `json:"sku,omitempty"`
@@ -13,6 +16,8 @@ type Product struct {
 	WeightInKg float64 `json:"weightInKg,omitempty"`
 	Perishable bool    `json:"perishable,omitempty"`
 }
+
+var ProductDoesNotExist = errors.New("shelf does not exist")
 
 type ProductService interface {
 	GetProductById(ctx context.Context, id string) (Product, error)
