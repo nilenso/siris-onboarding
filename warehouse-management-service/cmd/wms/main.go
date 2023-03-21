@@ -60,8 +60,9 @@ func main() {
 	warehouseService := postgres.NewWarehouseService(db)
 	shelfBlockService := postgres.NewShelfBlockService(db)
 	shelfService := postgres.NewShelfService(db)
+	productService := postgres.NewProductService(db)
 
-	h := handler.New(logger, warehouseService, shelfBlockService, shelfService)
+	h := handler.New(logger, warehouseService, shelfBlockService, shelfService, productService)
 
 	err = http.ListenAndServe(":80", h)
 	switch err {

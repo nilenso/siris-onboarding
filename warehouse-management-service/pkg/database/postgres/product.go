@@ -92,9 +92,9 @@ func (p *ProductService) DeleteProductById(ctx context.Context, id string) error
 }
 
 func (p *productQueriesImpl) createProductTx(ctx context.Context, tx *sql.Tx, product wms.Product) error {
-	query := "INSERT INTO product(sku, name, mrp, variant, length_in_cm, " +
-		"width_in_cm, height_in_cm, weight_in_kg, perishable) " +
-		"VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+	query := `INSERT INTO product(sku, name, mrp, variant, length_in_cm, 
+		width_in_cm, height_in_cm, weight_in_kg, perishable)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
 
 	_, err := tx.ExecContext(
 		ctx,
