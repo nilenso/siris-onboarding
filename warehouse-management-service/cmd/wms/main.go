@@ -58,8 +58,9 @@ func main() {
 	warehouseService := postgres.NewWarehouseService(db)
 	shelfBlockService := postgres.NewShelfBlockService(db)
 	shelfService := postgres.NewShelfService(db)
+	productService := postgres.NewProductService(db)
 
-	h := handler.New(logger, warehouseService, shelfBlockService, shelfService)
+	h := handler.New(logger, warehouseService, shelfBlockService, shelfService, productService)
 
 	exitChan := make(chan os.Signal, 1)
 	signal.Notify(exitChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)

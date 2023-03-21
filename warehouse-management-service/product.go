@@ -1,7 +1,6 @@
-package warehousemanagementservice
+package wms
 
 import (
-	"context"
 	"errors"
 )
 
@@ -18,13 +17,6 @@ type Product struct {
 }
 
 var ProductDoesNotExist = errors.New("shelf does not exist")
-
-type ProductService interface {
-	GetProductById(ctx context.Context, id string) (Product, error)
-	CreateProduct(ctx context.Context, product Product) error
-	UpdateProduct(ctx context.Context, product Product) error
-	DeleteProductById(ctx context.Context, id string) error
-}
 
 func NewProduct(
 	sku string,

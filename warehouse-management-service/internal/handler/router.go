@@ -28,5 +28,10 @@ func (h *handler) router() http.Handler {
 	router.Put("/shelf", h.UpdateShelf)
 	router.Delete("/shelf/{shelfId}", h.DeleteShelf)
 
+	router.Get("/product/{sku}", h.GetProduct)
+	router.Post("/product", h.CreateProduct)
+	router.Put("/product", h.UpdateProduct)
+	router.Delete("/product/{sku}", h.DeleteProduct)
+
 	return router
 }
