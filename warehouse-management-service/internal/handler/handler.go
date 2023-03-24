@@ -6,21 +6,21 @@ import (
 	"github.com/go-chi/chi/v5"
 	"gopkg.in/validator.v2"
 	"net/http"
-	warehousemanagementservice "warehouse-management-service"
+	wms "warehouse-management-service"
 	"warehouse-management-service/pkg/api"
 	"warehouse-management-service/pkg/log"
 )
 
 type handler struct {
-	warehouseService warehousemanagementservice.WarehouseService
-	shelfService     warehousemanagementservice.ShelfService
+	warehouseService wms.WarehouseService
+	shelfService     wms.ShelfService
 	logger           log.Logger
 }
 
 func New(
 	logger log.Logger,
-	warehouseService warehousemanagementservice.WarehouseService,
-	shelfService warehousemanagementservice.ShelfService,
+	warehouseService wms.WarehouseService,
+	shelfService wms.ShelfService,
 ) http.Handler {
 	handler := &handler{
 		logger:           logger,
@@ -51,7 +51,7 @@ func (h *handler) GetWarehouse(w http.ResponseWriter, r *http.Request) {
 
 	warehouse, err := h.warehouseService.GetWarehouseById(r.Context(), warehouseId)
 	switch err {
-	case warehousemanagementservice.WarehouseDoesNotExist:
+	case wms.WarehouseDoesNotExist:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.GetWarehouseResponse{Error: fmt.Sprintf(
@@ -102,7 +102,7 @@ func (h *handler) CreateWarehouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	warehouse := warehousemanagementservice.NewWarehouse(
+	warehouse := wms.NewWarehouse(
 		createWarehouseRequest.Name,
 		createWarehouseRequest.Latitude,
 		createWarehouseRequest.Longitude,
@@ -150,14 +150,14 @@ func (h *handler) UpdateWarehouse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := h.warehouseService.UpdateWarehouse(r.Context(), &warehousemanagementservice.Warehouse{
+	err := h.warehouseService.UpdateWarehouse(r.Context(), &wms.Warehouse{
 		Id:        updateWarehouseRequest.Id,
 		Name:      updateWarehouseRequest.Name,
 		Latitude:  updateWarehouseRequest.Latitude,
 		Longitude: updateWarehouseRequest.Longitude,
 	})
 	switch err {
-	case warehousemanagementservice.WarehouseDoesNotExist:
+	case wms.WarehouseDoesNotExist:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.WarehouseResponse{Error: fmt.Sprintf(
@@ -201,7 +201,7 @@ func (h *handler) DeleteWarehouse(w http.ResponseWriter, r *http.Request) {
 
 	err := h.warehouseService.DeleteWarehouse(r.Context(), warehouseId)
 	switch err {
-	case warehousemanagementservice.WarehouseDoesNotExist:
+	case wms.WarehouseDoesNotExist:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.WarehouseResponse{Error: fmt.Sprintf(
@@ -246,7 +246,7 @@ func (h *handler) GetShelfBlock(w http.ResponseWriter, r *http.Request) {
 
 	shelfBlock, err := h.shelfService.GetShelfBlockById(r.Context(), shelfBlockId)
 	switch err {
-	case warehousemanagementservice.ShelfBlockDoesNotExist:
+	case wms.ShelfBlockDoesNotExist:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.GetShelfBlockResponse{Error: fmt.Sprintf(
@@ -295,7 +295,7 @@ func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shelfBlock := warehousemanagementservice.NewShelfBlock(
+	shelfBlock := wms.NewShelfBlock(
 		createShelfBlockRequest.Aisle,
 		createShelfBlockRequest.Rack,
 		createShelfBlockRequest.StorageType,
@@ -310,7 +310,7 @@ func (h *handler) CreateShelfBlock(w http.ResponseWriter, r *http.Request) {
 				shelfBlock.Id,
 			)})
 		}
-	case warehousemanagementservice.InvalidWarehouse:
+	case wms.InvalidWarehouse:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{Error: fmt.Sprintf("%s: %s",
@@ -363,7 +363,7 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shelfBlock := warehousemanagementservice.ShelfBlock{
+	shelfBlock := wms.ShelfBlock{
 		Id:          updateShelfBlockRequest.Id,
 		Aisle:       updateShelfBlockRequest.Aisle,
 		Rack:        updateShelfBlockRequest.Rack,
@@ -379,7 +379,7 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 				shelfBlock.Id,
 			)})
 		}
-	case warehousemanagementservice.ShelfBlockDoesNotExist:
+	case wms.ShelfBlockDoesNotExist:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.ShelfBlockResponse{Error: fmt.Sprintf(
@@ -387,7 +387,7 @@ func (h *handler) UpdateShelfBlock(w http.ResponseWriter, r *http.Request) {
 				updateShelfBlockRequest.Id,
 			)})
 		}
-	case warehousemanagementservice.InvalidWarehouse:
+	case wms.InvalidWarehouse:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusBadRequest, api.ShelfBlockResponse{Error: fmt.Sprintf("%s: %s",
@@ -419,7 +419,7 @@ func (h *handler) DeleteShelfBlock(w http.ResponseWriter, r *http.Request) {
 
 	err := h.shelfService.DeleteShelfBlockById(r.Context(), shelfBlockId)
 	switch err {
-	case warehousemanagementservice.ShelfBlockDoesNotExist:
+	case wms.ShelfBlockDoesNotExist:
 		{
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.ShelfBlockResponse{Error: fmt.Sprintf(
