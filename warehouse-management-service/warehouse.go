@@ -1,4 +1,4 @@
-package warehousemanagementservice
+package wms
 
 import (
 	"errors"
