@@ -136,23 +136,21 @@ func (h *handler) UpdateWarehouse(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 
-	err := decoder.Decode(&updateWarehouseRequest)
-	if err != nil {
+	if err := decoder.Decode(&updateWarehouseRequest); err != nil {
 		h.logger.Log(log.Error, err)
 		h.response(w, http.StatusBadRequest, api.WarehouseResponse{
 			Error: "Failed to parse request"})
 		return
 	}
 
-	err = validator.Validate(updateWarehouseRequest)
-	if err != nil {
+	if err := validator.Validate(updateWarehouseRequest); err != nil {
 		h.logger.Log(log.Error, err)
 		h.response(w, http.StatusBadRequest, api.WarehouseResponse{
 			Error: fmt.Sprintf("Invalid input: %v", err.Error())})
 		return
 	}
 
-	err = h.warehouseService.UpdateWarehouse(r.Context(), &warehousemanagementservice.Warehouse{
+	err := h.warehouseService.UpdateWarehouse(r.Context(), &warehousemanagementservice.Warehouse{
 		Id:        updateWarehouseRequest.Id,
 		Name:      updateWarehouseRequest.Name,
 		Latitude:  updateWarehouseRequest.Latitude,
