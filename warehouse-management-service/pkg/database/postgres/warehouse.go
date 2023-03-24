@@ -9,6 +9,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// mockgen -source="./pkg/database/postgres/warehouse.go" -destination="./pkg/database/postgres/warehouse_mock.go"
 type warehouseQueries interface {
 	createWarehouseTx(ctx context.Context, tx *sql.Tx, warehouse *wms.Warehouse) error
 	getWarehouseByIdTx(ctx context.Context, tx *sql.Tx, id string) (*wms.Warehouse, error)

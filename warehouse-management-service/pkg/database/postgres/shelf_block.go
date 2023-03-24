@@ -7,6 +7,7 @@ import (
 	wms "warehouse-management-service"
 )
 
+// mockgen -source="./pkg/database/postgres/shelf_block.go" -destination="./pkg/database/postgres/shelf_block.go"
 type shelfBlockQueries interface {
 	createShelfBlockTx(ctx context.Context, tx *sql.Tx, block wms.ShelfBlock) error
 	getShelfBlockByIdTx(ctx context.Context, tx *sql.Tx, id string) (wms.ShelfBlock, error)
@@ -105,8 +106,7 @@ func (s *ShelfBlockService) DeleteShelfBlockById(ctx context.Context, id string)
 }
 
 func (s *shelfBlockQueriesImpl) createShelfBlockTx(ctx context.Context, tx *sql.Tx, block wms.ShelfBlock) error {
-	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId);
-		err != nil {
+	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId); err != nil {
 		return err
 	} else if !warehouseExists {
 		return InvalidWarehouse
@@ -139,8 +139,7 @@ func (s *shelfBlockQueriesImpl) getShelfBlockByIdTx(ctx context.Context, tx *sql
 }
 
 func (s *shelfBlockQueriesImpl) updateShelfBlockTx(ctx context.Context, tx *sql.Tx, block wms.ShelfBlock) error {
-	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId);
-		err != nil {
+	if warehouseExists, err := s.warehouseExistsTx(ctx, tx, block.WarehouseId); err != nil {
 		return err
 	} else if !warehouseExists {
 		return InvalidWarehouse

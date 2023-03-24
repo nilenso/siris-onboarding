@@ -16,6 +16,7 @@ type ShelfBlock struct {
 var ShelfBlockDoesNotExist = errors.New("shelf block does not exist")
 var InvalidWarehouse = errors.New("invalid warehouse")
 
+// mockgen -source="./shelf_block.go" -destination="./internal/handler/mock/shelf_block.go"
 type ShelfService interface {
 	GetShelfBlockById(ctx context.Context, id string) (ShelfBlock, error)
 	CreateShelfBlock(ctx context.Context, shelfBlock ShelfBlock) error
