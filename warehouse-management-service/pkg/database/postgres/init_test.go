@@ -14,6 +14,7 @@ const (
 )
 
 var warehouseService *WarehouseService
+var shelfService *ShelfBlockService
 var postgres *Postgres
 
 func TestMain(m *testing.M) {
@@ -41,6 +42,7 @@ func TestMain(m *testing.M) {
 	}
 
 	warehouseService = NewWarehouseService(db)
+	shelfService = NewShelfService(db)
 
 	mockDB, err := postgres.Open()
 	if err != nil {

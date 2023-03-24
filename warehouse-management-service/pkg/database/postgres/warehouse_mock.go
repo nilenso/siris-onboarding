@@ -13,7 +13,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// Mockqueries is a mock of queries interface.
+// Mockqueries is a mock of warehouseQueries interface.
 type Mockqueries struct {
 	ctrl     *gomock.Controller
 	recorder *MockqueriesMockRecorder
