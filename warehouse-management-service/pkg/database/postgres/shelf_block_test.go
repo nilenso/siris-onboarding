@@ -81,8 +81,8 @@ func TestGetShelfBlockByIdTxError(t *testing.T) {
 	defer tx.Rollback()
 
 	_, err = shelfService.queries.getShelfBlockByIdTx(context.Background(), tx, "bad_id")
-	if err == nil {
-		t.Errorf("expected: %v, got: %v", "error", err)
+	if err != sql.ErrNoRows {
+		t.Errorf("expected: %v, got: %v", sql.ErrNoRows, err)
 	}
 }
 
