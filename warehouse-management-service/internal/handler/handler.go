@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
@@ -11,16 +12,32 @@ import (
 	"warehouse-management-service/pkg/log"
 )
 
+// mockgen -source="./warehouse.go" -destination="./internal/handler/mock/warehouse.go"
+type WarehouseService interface {
+	GetWarehouseById(ctx context.Context, id string) (*wms.Warehouse, error)
+	CreateWarehouse(ctx context.Context, warehouse *wms.Warehouse) error
+	UpdateWarehouse(ctx context.Context, warehouse *wms.Warehouse) error
+	DeleteWarehouse(ctx context.Context, id string) error
+}
+
+// mockgen -source="./shelf_block.go" -destination="./internal/handler/mock/shelf_block.go"
+type ShelfService interface {
+	GetShelfBlockById(ctx context.Context, id string) (wms.ShelfBlock, error)
+	CreateShelfBlock(ctx context.Context, shelfBlock wms.ShelfBlock) error
+	UpdateShelfBlock(ctx context.Context, shelfBlock wms.ShelfBlock) error
+	DeleteShelfBlockById(ctx context.Context, id string) error
+}
+
 type handler struct {
-	warehouseService wms.WarehouseService
-	shelfService     wms.ShelfService
+	warehouseService WarehouseService
+	shelfService     ShelfService
 	logger           log.Logger
 }
 
 func New(
 	logger log.Logger,
-	warehouseService wms.WarehouseService,
-	shelfService wms.ShelfService,
+	warehouseService WarehouseService,
+	shelfService ShelfService,
 ) http.Handler {
 	handler := &handler{
 		logger:           logger,
