@@ -205,17 +205,17 @@ func TestCreateWarehouse(t *testing.T) {
 func TestCreateWarehouseRequestError(t *testing.T) {
 	tests := []struct {
 		createWarehouseRequest interface{}
-		want                   api.WarehouseResponse
+		want                   []string
 		wantStatusCode         int
 	}{
 		{
 			createWarehouseRequest: nil,
-			want:                   api.WarehouseResponse{Error: "request body cannot be empty"},
+			want:                   []string{"request body cannot be empty"},
 			wantStatusCode:         http.StatusBadRequest,
 		},
 		{
 			createWarehouseRequest: map[string]string{"foo": "bar"},
-			want:                   api.WarehouseResponse{Error: "Failed to parse request"},
+			want:                   []string{"Failed to parse request"},
 			wantStatusCode:         http.StatusBadRequest,
 		},
 		{
@@ -224,8 +224,11 @@ func TestCreateWarehouseRequestError(t *testing.T) {
 				Latitude:  -90.21,
 				Longitude: -180.78,
 			},
-			want: api.WarehouseResponse{Error: "Invalid input: name cannot be empty, latitude has to be in the range [-90, 90], " +
-				"longitude has to be in the range [-180, 180]"},
+			want: []string{
+				"Name: zero value",
+				"Latitude: less than min",
+				"Longitude: less than min",
+			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
@@ -234,8 +237,10 @@ func TestCreateWarehouseRequestError(t *testing.T) {
 				Latitude:  100,
 				Longitude: 190.89,
 			},
-			want: api.WarehouseResponse{Error: "Invalid input: latitude has to be in the range [-90, 90], " +
-				"longitude has to be in the range [-180, 180]"},
+			want: []string{
+				"Latitude: greater than max",
+				"Longitude: greater than max",
+			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -271,8 +276,10 @@ func TestCreateWarehouseRequestError(t *testing.T) {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
 		}
 
-		if got != test.want {
-			t.Errorf("want: %v, got: %v", test.want, got)
+		for _, want := range test.want {
+			if !strings.Contains(got.Error, want) {
+				t.Errorf("want: %v, got: %v", test.want, got)
+			}
 		}
 	}
 }
@@ -280,17 +287,17 @@ func TestCreateWarehouseRequestError(t *testing.T) {
 func TestUpdateWarehouseRequestError(t *testing.T) {
 	tests := []struct {
 		updateWarehouseRequest interface{}
-		want                   api.WarehouseResponse
+		want                   []string
 		wantStatusCode         int
 	}{
 		{
 			updateWarehouseRequest: nil,
-			want:                   api.WarehouseResponse{Error: "request body cannot be empty"},
+			want:                   []string{"request body cannot be empty"},
 			wantStatusCode:         http.StatusBadRequest,
 		},
 		{
 			updateWarehouseRequest: map[string]string{"foo": "bar"},
-			want:                   api.WarehouseResponse{Error: "Failed to parse request"},
+			want:                   []string{"Failed to parse request"},
 			wantStatusCode:         http.StatusBadRequest,
 		},
 		{
@@ -300,8 +307,12 @@ func TestUpdateWarehouseRequestError(t *testing.T) {
 				Latitude:  -90.21,
 				Longitude: -180.78,
 			},
-			want: api.WarehouseResponse{Error: "Invalid input: id cannot be empty, name cannot be empty, latitude has to be in the range [-90, 90], " +
-				"longitude has to be in the range [-180, 180]"},
+			want: []string{
+				"Latitude: less than min",
+				"Longitude: less than min",
+				"Id: zero value",
+				"Name: zero value",
+			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 		{
@@ -311,8 +322,10 @@ func TestUpdateWarehouseRequestError(t *testing.T) {
 				Latitude:  100,
 				Longitude: 190.89,
 			},
-			want: api.WarehouseResponse{Error: "Invalid input: latitude has to be in the range [-90, 90], " +
-				"longitude has to be in the range [-180, 180]"},
+			want: []string{
+				"Latitude: greater than max",
+				"Longitude: greater than max",
+			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -348,8 +361,10 @@ func TestUpdateWarehouseRequestError(t *testing.T) {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
 		}
 
-		if got != test.want {
-			t.Errorf("want: %v, got: %v", test.want, got)
+		for _, want := range test.want {
+			if !strings.Contains(got.Error, want) {
+				t.Errorf("want: %v, got: %v", want, got)
+			}
 		}
 	}
 }
@@ -697,17 +712,17 @@ func TestCreateShelfBlock(t *testing.T) {
 func TestCreateShelfBlockRequestError(t *testing.T) {
 	tests := []struct {
 		createShelfBlockRequest interface{}
-		want                    api.ShelfBlockResponse
+		want                    []string
 		wantStatusCode          int
 	}{
 		{
 			createShelfBlockRequest: nil,
-			want:                    api.ShelfBlockResponse{Error: "request body cannot be empty"},
+			want:                    []string{"request body cannot be empty"},
 			wantStatusCode:          http.StatusBadRequest,
 		},
 		{
 			createShelfBlockRequest: map[string]string{"foo": "bar"},
-			want:                    api.ShelfBlockResponse{Error: "Failed to parse request"},
+			want:                    []string{"Failed to parse request"},
 			wantStatusCode:          http.StatusBadRequest,
 		},
 		{
@@ -717,7 +732,12 @@ func TestCreateShelfBlockRequestError(t *testing.T) {
 				StorageType: "",
 				WarehouseId: "",
 			},
-			want:           api.ShelfBlockResponse{Error: "Invalid input: aisle cannot be empty, rack cannot be empty, storageType cannot be empty, warehouseId cannot be empty"},
+			want: []string{
+				"StorageType: zero value",
+				"WarehouseId: zero value",
+				"Aisle: zero value",
+				"Rack: zero value",
+			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -753,8 +773,10 @@ func TestCreateShelfBlockRequestError(t *testing.T) {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
 		}
 
-		if got != test.want {
-			t.Errorf("want: %v, got: %v", test.want, got)
+		for _, want := range test.want {
+			if !strings.Contains(got.Error, want) {
+				t.Errorf("want: %v, got: %v", test.want, got)
+			}
 		}
 	}
 }
@@ -852,7 +874,7 @@ func TestUpdateShelfBlock(t *testing.T) {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
 		}
 
-		if got != test.updateShelfBlockResponse {
+		if got.Error != test.updateShelfBlockResponse.Error {
 			t.Errorf("want: %v, got: %v", test.updateShelfBlockResponse, got)
 		}
 	}
@@ -861,23 +883,29 @@ func TestUpdateShelfBlock(t *testing.T) {
 func TestUpdateShelfBlockRequestError(t *testing.T) {
 	tests := []struct {
 		updateWarehouseRequest interface{}
-		want                   api.ShelfBlockResponse
+		want                   []string
 		wantStatusCode         int
 	}{
 		{
 			updateWarehouseRequest: nil,
-			want:                   api.ShelfBlockResponse{Error: "request body cannot be empty"},
+			want:                   []string{"request body cannot be empty"},
 			wantStatusCode:         http.StatusBadRequest,
 		},
 		{
 			updateWarehouseRequest: map[string]string{"foo": "bar"},
-			want:                   api.ShelfBlockResponse{Error: "Failed to parse request"},
+			want:                   []string{"Failed to parse request"},
 			wantStatusCode:         http.StatusBadRequest,
 		},
 		{
 			updateWarehouseRequest: api.UpdateShelfBlockRequest{},
-			want:                   api.ShelfBlockResponse{Error: "Invalid input: id cannot be empty, aisle cannot be empty, rack cannot be empty, storageType cannot be empty, warehouseId cannot be empty"},
-			wantStatusCode:         http.StatusBadRequest,
+			want: []string{
+				"Id: zero value",
+				"Aisle: zero value",
+				"Rack: zero value",
+				"StorageType: zero value",
+				"WarehouseId: zero value",
+			},
+			wantStatusCode: http.StatusBadRequest,
 		},
 		{
 			updateWarehouseRequest: api.UpdateShelfBlockRequest{
@@ -887,10 +915,14 @@ func TestUpdateShelfBlockRequestError(t *testing.T) {
 				StorageType: "",
 				WarehouseId: "",
 			},
-			want:           api.ShelfBlockResponse{Error: "Invalid input: storageType cannot be empty, warehouseId cannot be empty"},
+			want: []string{
+				"StorageType: zero value",
+				"WarehouseId: zero value",
+			},
 			wantStatusCode: http.StatusBadRequest,
 		},
 	}
+
 	for _, test := range tests {
 		var requestBody io.Reader
 
@@ -923,8 +955,10 @@ func TestUpdateShelfBlockRequestError(t *testing.T) {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
 		}
 
-		if got != test.want {
-			t.Errorf("want: %v, got: %v", test.want, got)
+		for _, want := range test.want {
+			if !strings.Contains(got.Error, want) {
+				t.Errorf("want: %v, got: %v", test.want, got)
+			}
 		}
 	}
 }
