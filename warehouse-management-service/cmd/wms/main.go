@@ -18,7 +18,8 @@ const (
 )
 
 func main() {
-	runDBMigrations := *flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
+	runDBMigrations := flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
+	flag.Parse()
 
 	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
 	if !ok {
@@ -41,7 +42,8 @@ func main() {
 		os.Exit(1)
 	}
 
-	if runDBMigrations {
+	if *runDBMigrations {
+		println("running migrations")
 		err := pg.RunMigration(appConfig.DBMigration.SourcePath)
 		if err != nil {
 			logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
