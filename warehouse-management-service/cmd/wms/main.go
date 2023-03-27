@@ -19,7 +19,8 @@ import (
 )
 
 func main() {
-	runDBMigrations := *flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
+	runDBMigrations := flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
+	flag.Parse()
 
 	appConfig, err := config.FromEnv()
 	if err != nil {
@@ -45,7 +46,7 @@ func main() {
 		}
 	}()
 
-	if runDBMigrations {
+	if *runDBMigrations {
 		logger.Log(log.Info, "Running database migrations")
 		err := pg.RunMigration(appConfig.DBMigrationSourcePath)
 		if err != nil {
