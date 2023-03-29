@@ -37,7 +37,7 @@ func (s *ShelfBlockService) GetShelfBlockById(ctx context.Context, id string) (w
 	if err != nil {
 		return wms.ShelfBlock{}, err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	shelfBlock, err := s.queries.getShelfBlockByIdTx(ctx, tx, id)
 	switch err {
@@ -55,7 +55,7 @@ func (s *ShelfBlockService) CreateShelfBlock(ctx context.Context, shelfBlock wms
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = s.queries.createShelfBlockTx(ctx, tx, shelfBlock)
 	switch err {
@@ -73,7 +73,7 @@ func (s *ShelfBlockService) UpdateShelfBlock(ctx context.Context, shelfBlock wms
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = s.queries.updateShelfBlockTx(ctx, tx, shelfBlock)
 	switch err {
@@ -93,7 +93,7 @@ func (s *ShelfBlockService) DeleteShelfBlockById(ctx context.Context, id string)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = s.queries.deleteShelfBlockTx(ctx, tx, id)
 	switch err {

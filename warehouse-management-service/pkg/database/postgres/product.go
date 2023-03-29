@@ -32,7 +32,7 @@ func (p *ProductService) GetProductById(ctx context.Context, id string) (wms.Pro
 	if err != nil {
 		return wms.Product{}, err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	product, err := p.queries.getProductByIdTx(ctx, tx, id)
 	switch err {
@@ -50,7 +50,7 @@ func (p *ProductService) CreateProduct(ctx context.Context, product wms.Product)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = p.queries.createProductTx(ctx, tx, product)
 	if err != nil {
@@ -64,7 +64,7 @@ func (p *ProductService) UpdateProduct(ctx context.Context, product wms.Product)
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = p.queries.updateProductTx(ctx, tx, product)
 	if err != nil {
@@ -78,7 +78,7 @@ func (p *ProductService) DeleteProductById(ctx context.Context, id string) error
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = p.queries.deleteProductTx(ctx, tx, id)
 	switch err {

@@ -116,6 +116,9 @@ func TestGetWarehouseById(t *testing.T) {
 		}
 		var got api.GetWarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -191,6 +194,9 @@ func TestCreateWarehouse(t *testing.T) {
 		}
 		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -271,6 +277,9 @@ func TestCreateWarehouseRequestError(t *testing.T) {
 		}
 		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -356,6 +365,9 @@ func TestUpdateWarehouseRequestError(t *testing.T) {
 		}
 		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -456,6 +468,9 @@ func TestUpdateWarehouse(t *testing.T) {
 		}
 		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -526,6 +541,9 @@ func TestDeleteWarehouse(t *testing.T) {
 		}
 		var got api.WarehouseResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -604,6 +622,9 @@ func TestGetShelfBlockById(t *testing.T) {
 		}
 		var got api.GetShelfBlockResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -695,6 +716,9 @@ func TestCreateShelfBlock(t *testing.T) {
 		}
 		var got api.ShelfBlockResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -768,6 +792,9 @@ func TestCreateShelfBlockRequestError(t *testing.T) {
 		}
 		var got api.ShelfBlockResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -869,6 +896,9 @@ func TestUpdateShelfBlock(t *testing.T) {
 		}
 		var got api.ShelfBlockResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -950,6 +980,9 @@ func TestUpdateShelfBlockRequestError(t *testing.T) {
 		}
 		var got api.ShelfBlockResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -1022,6 +1055,9 @@ func TestDeleteShelfBlock(t *testing.T) {
 		}
 		var got api.ShelfBlockResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -1104,6 +1140,9 @@ func TestGetShelfById(t *testing.T) {
 		}
 		var got api.ShelfResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -1196,6 +1235,9 @@ func TestCreateShelf(t *testing.T) {
 		}
 		var got api.ShelfResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -1299,6 +1341,9 @@ func TestUpdateShelf(t *testing.T) {
 		}
 		var got api.ShelfResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
@@ -1369,6 +1414,9 @@ func TestDeleteShelf(t *testing.T) {
 		}
 		var got api.ShelfResponse
 		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+		}
 
 		if response.StatusCode != test.wantStatusCode {
 			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
