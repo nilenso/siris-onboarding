@@ -189,7 +189,7 @@ func TestGetWarehouseByIDTx(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// insert row
 	query := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
@@ -214,7 +214,7 @@ func TestGetWarehouseByIdTxError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 	_, err = warehouseService.queries.getWarehouseByIdTx(context.Background(), tx, "non-existent-id")
 	if err == nil {
 		t.Errorf("expected: %v, got: %v", "error", err)
@@ -230,7 +230,11 @@ func TestCreateWarehouseTx(t *testing.T) {
 	}
 
 	tx, err := warehouseService.db.BeginTx(context.Background(), nil)
-	defer tx.Rollback()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	defer func() { _ = tx.Rollback() }()
 
 	err = warehouseService.queries.createWarehouseTx(context.Background(), tx, &warehouse)
 	if err != nil {
@@ -263,7 +267,7 @@ func TestCreateWarehouseQueryTxError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = warehouseService.queries.createWarehouseTx(context.Background(), tx, &warehouse)
 	if err != nil {
@@ -318,7 +322,7 @@ func TestUpdateWarehouseTx(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// insert row
 	query := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
@@ -360,7 +364,7 @@ func TestUpdateWarehouseTxError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// update row
 	err = warehouseService.queries.updateWarehouseTx(context.Background(), tx, &warehouseUpdated)
@@ -385,7 +389,7 @@ func TestDeleteWarehouseTx(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// insert row
 	query := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
@@ -406,7 +410,7 @@ func TestDeleteWarehouseTxError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = warehouseService.queries.deleteWarehouseTx(context.Background(), tx, "non-existent-id")
 	if err == nil {

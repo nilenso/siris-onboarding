@@ -38,7 +38,7 @@ func (w *WarehouseService) GetWarehouseById(ctx context.Context, id string) (*wm
 	if err != nil {
 		return nil, err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	warehouse, err := w.queries.getWarehouseByIdTx(ctx, tx, id)
 	switch err {
@@ -56,7 +56,7 @@ func (w *WarehouseService) CreateWarehouse(ctx context.Context, warehouse *wms.W
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = w.queries.createWarehouseTx(ctx, tx, warehouse)
 	if err != nil {
@@ -71,7 +71,7 @@ func (w *WarehouseService) UpdateWarehouse(ctx context.Context, warehouse *wms.W
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = w.queries.updateWarehouseTx(ctx, tx, warehouse)
 	switch err {
@@ -89,7 +89,7 @@ func (w *WarehouseService) DeleteWarehouse(ctx context.Context, id string) error
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = w.queries.deleteWarehouseTx(ctx, tx, id)
 	switch err {
