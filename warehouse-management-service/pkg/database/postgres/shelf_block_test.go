@@ -30,7 +30,7 @@ func TestGetShelfBlockByIdTx(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// insert warehouse and shelf_block records
 	warehouseQuery := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
@@ -67,6 +67,9 @@ func TestGetShelfBlockByIdTx(t *testing.T) {
 		tx,
 		shelfBlock.Id,
 	)
+	if err != nil {
+		t.Error(err)
+	}
 
 	if shelfBlockFromDB != shelfBlock {
 		t.Errorf("expected: %v, got: %v", shelfBlock, shelfBlockFromDB)
@@ -78,7 +81,7 @@ func TestGetShelfBlockByIdTxError(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	_, err = shelfBlockService.queries.getShelfBlockByIdTx(context.Background(), tx, "bad_id")
 	if err != sql.ErrNoRows {
@@ -107,7 +110,7 @@ func TestCreateShelfBlockTx(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// insert warehouse
 	warehouseQuery := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
@@ -165,7 +168,7 @@ func TestCreateShelfBlockTxError(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = shelfBlockService.queries.createShelfBlockTx(context.Background(), tx, shelfBlock)
 	if err == nil {
@@ -202,7 +205,7 @@ func TestUpdateShelfBlockTx(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// insert warehouse
 	warehouseQuery := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
@@ -275,7 +278,7 @@ func TestUpdateShelfBlockTxError(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = shelfBlockService.queries.updateShelfBlockTx(context.Background(), tx, shelfBlockUpdated)
 	if err == nil {
@@ -304,7 +307,8 @@ func TestUpdateShelfBlockTxNoRowsError(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
+
 	warehouseQuery := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
 	_, err = tx.ExecContext(
 		context.Background(),
@@ -346,7 +350,7 @@ func TestDeleteShelfBlockTx(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	// insert warehouse and shelf_block records
 	warehouseQuery := "INSERT INTO warehouse (id, name, geolocation) VALUES ($1, $2, point($3, $4))"
@@ -403,7 +407,7 @@ func TestDeleteShelfBlockTxError(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = shelfBlockService.queries.deleteShelfBlockTx(context.Background(), tx, "non-existent-id")
 	if err != RowDoesNotExist {

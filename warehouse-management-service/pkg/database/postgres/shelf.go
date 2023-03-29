@@ -36,7 +36,7 @@ func (s *ShelfService) GetShelfById(ctx context.Context, id string) (wms.Shelf, 
 	if err != nil {
 		return wms.Shelf{}, err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	shelf, err := s.queries.getShelfByIdTx(ctx, tx, id)
 	switch err {
@@ -54,7 +54,7 @@ func (s *ShelfService) CreateShelf(ctx context.Context, shelf wms.Shelf) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = s.queries.createShelfTx(ctx, tx, shelf)
 	switch err {
@@ -72,7 +72,7 @@ func (s *ShelfService) UpdateShelf(ctx context.Context, shelf wms.Shelf) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = s.queries.updateShelfTx(ctx, tx, shelf)
 	switch err {
@@ -92,7 +92,7 @@ func (s *ShelfService) DeleteShelfById(ctx context.Context, id string) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	err = s.queries.deleteShelfTx(ctx, tx, id)
 	switch err {
