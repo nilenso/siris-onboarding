@@ -37,7 +37,7 @@ func TestMain(m *testing.M) {
 	}
 	defer db.Close()
 
-	err = postgres.RunMigration(cfg.DBMigration.SourcePath)
+	err = postgres.RunMigration(cfg.DBMigrationSourcePath)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to run database migrations: %v", err))
 	}
@@ -57,7 +57,7 @@ func TestMain(m *testing.M) {
 
 	m.Run()
 
-	err = postgres.MigrateDown(cfg.DBMigration.SourcePath)
+	err = postgres.MigrateDown(cfg.DBMigrationSourcePath)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to migrate down: %v", err))
 	}
