@@ -13,22 +13,13 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	EnvConfigFilePath = "CONFIG_FILE_PATH"
-)
-
 func main() {
 	runDBMigrations := flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
 	flag.Parse()
 
-	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
-	if !ok {
-		panic("Failed to read environment variable")
-	}
-
-	appConfig, err := config.FromFile(configFilePath)
+	appConfig, err := config.FromEnv()
 	if err != nil {
-		panic("Failed to read appConfig file")
+		panic(fmt.Sprintf("Failed to read config %v", err))
 	}
 
 	logger := log.New()
@@ -43,8 +34,7 @@ func main() {
 	}
 
 	if *runDBMigrations {
-		println("running migrations")
-		err := pg.RunMigration(appConfig.DBMigration.SourcePath)
+		err := pg.RunMigration(appConfig.DBMigrationSourcePath)
 		if err != nil {
 			logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
 			os.Exit(1)
