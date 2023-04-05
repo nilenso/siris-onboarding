@@ -494,25 +494,19 @@ func (h *handler) GetShelf(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shelf, err := h.shelfService.GetShelfById(r.Context(), shelfId)
-	switch err {
-	case wms.ShelfDoesNotExist:
-		{
+	if err != nil {
+		if err == wms.ShelfDoesNotExist {
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusNotFound, api.ShelfResponse{Error: fmt.Sprintf(
 				"failed to get, shelf: %s does not exist",
 				shelfId,
 			)})
-		}
-	case nil:
-		{
-			h.response(w, http.StatusOK, api.ShelfResponse{Response: shelf})
-		}
-	default:
-		{
+		} else {
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusInternalServerError, api.ShelfResponse{Error: "Failed to get shelf"})
 		}
 	}
+	h.response(w, http.StatusOK, api.ShelfResponse{Response: shelf})
 }
 
 func (h *handler) CreateShelf(w http.ResponseWriter, r *http.Request) {
