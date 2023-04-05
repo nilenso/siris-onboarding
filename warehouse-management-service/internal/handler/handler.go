@@ -510,7 +510,7 @@ func (h *handler) GetShelf(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) CreateShelf(w http.ResponseWriter, r *http.Request) {
-	var createShelfRequest api.CreateShelfRequest
+	var createShelfRequest wms.Shelf
 
 	if r.Body == nil {
 		err := fmt.Errorf("request body cannot be empty")
@@ -574,7 +574,7 @@ func (h *handler) CreateShelf(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *handler) UpdateShelf(w http.ResponseWriter, r *http.Request) {
-	var updateShelfRequest api.UpdateShelfRequest
+	var updateShelfRequest wms.Shelf
 
 	if r.Body == nil {
 		err := fmt.Errorf("request body cannot be empty")
@@ -605,21 +605,13 @@ func (h *handler) UpdateShelf(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shelf := wms.Shelf{
-		Id:           updateShelfRequest.Id,
-		Label:        updateShelfRequest.Label,
-		Section:      updateShelfRequest.Section,
-		Level:        updateShelfRequest.Level,
-		ShelfBlockId: updateShelfRequest.ShelfBlockId,
-	}
-
-	err = h.shelfService.UpdateShelf(r.Context(), shelf)
+	err = h.shelfService.UpdateShelf(r.Context(), updateShelfRequest)
 	switch err {
 	case nil:
 		{
 			h.response(w, http.StatusOK, api.ShelfResponse{Message: fmt.Sprintf(
 				"Successfully updated shelf: %s",
-				shelf.Id,
+				updateShelfRequest.Id,
 			)})
 		}
 	case wms.ShelfDoesNotExist:
@@ -635,7 +627,7 @@ func (h *handler) UpdateShelf(w http.ResponseWriter, r *http.Request) {
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusBadRequest, api.ShelfResponse{Error: fmt.Sprintf("%s: %s",
 				err.Error(),
-				shelf.ShelfBlockId,
+				updateShelfRequest.ShelfBlockId,
 			)})
 		}
 	default:
