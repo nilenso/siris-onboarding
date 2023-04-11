@@ -501,9 +501,11 @@ func (h *handler) GetShelf(w http.ResponseWriter, r *http.Request) {
 				"failed to get, shelf: %s does not exist",
 				shelfId,
 			)})
+			return
 		} else {
 			h.logger.Log(log.Error, err)
 			h.response(w, http.StatusInternalServerError, api.ShelfResponse{Error: "Failed to get shelf"})
+			return
 		}
 	}
 	h.response(w, http.StatusOK, api.ShelfResponse{Response: shelf})
