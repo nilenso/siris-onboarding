@@ -12,7 +12,7 @@ import (
 	"warehouse-management-service/pkg/log"
 )
 
-// mockgen -source="./warehouse.go" -destination="./internal/handler/mock/warehouse.go"
+// mockgen -destination="./internal/handler/mock/warehouse.go" warehouse-management-service/internal/handler WarehouseService
 type WarehouseService interface {
 	GetWarehouseById(ctx context.Context, id string) (*wms.Warehouse, error)
 	CreateWarehouse(ctx context.Context, warehouse *wms.Warehouse) error
@@ -20,7 +20,7 @@ type WarehouseService interface {
 	DeleteWarehouse(ctx context.Context, id string) error
 }
 
-// mockgen -source="./shelf_block.go" -destination="./internal/handler/mock/shelf_block.go"
+// mockgen -destination="./internal/handler/mock/shelf_block.go" warehouse-management-service/internal/handler ShelfBlockService
 type ShelfBlockService interface {
 	GetShelfBlockById(ctx context.Context, id string) (wms.ShelfBlock, error)
 	CreateShelfBlock(ctx context.Context, shelfBlock wms.ShelfBlock) error
@@ -28,6 +28,7 @@ type ShelfBlockService interface {
 	DeleteShelfBlockById(ctx context.Context, id string) error
 }
 
+// mockgen -destination="./internal/handler/mock/shelf.go" warehouse-management-service/internal/handler ShelfService
 type ShelfService interface {
 	GetShelfById(ctx context.Context, id string) (wms.Shelf, error)
 	CreateShelf(ctx context.Context, shelf wms.Shelf) error
@@ -35,6 +36,7 @@ type ShelfService interface {
 	DeleteShelfById(ctx context.Context, id string) error
 }
 
+// mockgen -destination="./internal/handler/mock/product.go" warehouse-management-service/internal/handler ProductService
 type ProductService interface {
 	GetProductById(ctx context.Context, id string) (wms.Product, error)
 	CreateProduct(ctx context.Context, product wms.Product) error
