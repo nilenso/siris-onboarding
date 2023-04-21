@@ -1428,6 +1428,80 @@ func TestDeleteShelf(t *testing.T) {
 	}
 }
 
+func TestDeleteProduct(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockObj := mock.NewMockProductService(mockCtrl)
+	tests := []struct {
+		deleteProductRequest string
+		deleteProductErr     error
+		wantStatusCode       int
+		wantResponse         api.ProductResponse
+	}{
+		{
+			deleteProductRequest: "0516b3dd-ecf3-4595-80bd-61a614d30e97",
+			deleteProductErr:     nil,
+			wantStatusCode:       http.StatusOK,
+			wantResponse: api.ProductResponse{Message: fmt.Sprintf(
+				"Successfully deleted product: %s",
+				"0516b3dd-ecf3-4595-80bd-61a614d30e97",
+			)},
+		},
+		{
+			deleteProductRequest: "56f355c4-dc3b-4784-944f-5c20535d1230",
+			deleteProductErr:     sql.ErrConnDone,
+			wantStatusCode:       http.StatusInternalServerError,
+			wantResponse:         api.ProductResponse{Error: "Failed to delete product"},
+		},
+		{
+			deleteProductRequest: "351fe2ea-a712-452d-be04-812814275e66",
+			deleteProductErr:     wms.ProductDoesNotExist,
+			wantStatusCode:       http.StatusNotFound,
+			wantResponse: api.ProductResponse{Error: fmt.Sprintf(
+				"failed to delete, product: %s does not exist",
+				"351fe2ea-a712-452d-be04-812814275e66",
+			)},
+		},
+	}
+
+	for _, test := range tests {
+		mockObj.EXPECT().DeleteProductById(gomock.Any(), test.deleteProductRequest).Return(test.deleteProductErr)
+		h.productService = mockObj
+
+		requestURL := fmt.Sprintf("/product/%s", test.deleteProductRequest)
+		request, err := http.NewRequest(
+			"DELETE",
+			requestURL,
+			nil,
+		)
+		if err != nil {
+			t.Error(err)
+		}
+
+		response := executeRequest(request)
+		responseBody, err := io.ReadAll(response.Body)
+		if err != nil {
+			t.Error(err)
+		}
+
+		var got api.ProductResponse
+		err = json.Unmarshal(responseBody, &got)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		if response.StatusCode != test.wantStatusCode {
+			t.Errorf("want: %v, got: %v", test.wantStatusCode, response.StatusCode)
+		}
+
+		if got != test.wantResponse {
+			t.Errorf("want: %v, got: %v", test.wantResponse, got)
+		}
+	}
+}
+
 func executeRequest(request *http.Request) *http.Response {
 	responseRecorder := httptest.NewRecorder()
 
