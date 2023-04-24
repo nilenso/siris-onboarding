@@ -1,10 +1,15 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"sync"
+	"syscall"
+	"time"
 	"warehouse-management-service/internal/config"
 	"warehouse-management-service/internal/handler"
 	"warehouse-management-service/pkg/database/postgres"
@@ -13,21 +18,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const (
-	EnvConfigFilePath = "CONFIG_FILE_PATH"
-)
-
 func main() {
 	runDBMigrations := *flag.Bool("migrate", false, "true or false, specifies if database migrations should be run")
 
-	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
-	if !ok {
-		panic("Failed to read environment variable")
-	}
-
-	appConfig, err := config.FromFile(configFilePath)
+	appConfig, err := config.FromEnv()
 	if err != nil {
-		panic("Failed to read appConfig file")
+		panic(fmt.Sprintf("Failed to read config %v", err))
 	}
 
 	logger := log.New()
@@ -37,24 +33,26 @@ func main() {
 
 	db, err := pg.Open()
 	if err != nil {
-		logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
-		os.Exit(1)
+		logger.Log(log.Fatal, fmt.Sprintf("Failed to connect to database: %v", err))
+		return
 	}
 
-	if runDBMigrations {
-		err := pg.RunMigration(appConfig.DBMigration.SourcePath)
-		if err != nil {
-			logger.Log(log.Fatal, fmt.Sprintf("App startup error: %v", err))
-			os.Exit(1)
-		}
-	}
-
+	// close db gracefully
 	defer func() {
 		err = db.Close()
 		if err != nil {
 			logger.Log(log.Error, err)
 		}
 	}()
+
+	if runDBMigrations {
+		logger.Log(log.Info, "Running database migrations")
+		err := pg.RunMigration(appConfig.DBMigrationSourcePath)
+		if err != nil {
+			logger.Log(log.Fatal, fmt.Sprintf("Failed to run database migrations: %v", err))
+			return
+		}
+	}
 
 	// Instantiate Postgres-backed services
 	warehouseService := postgres.NewWarehouseService(db)
@@ -63,12 +61,36 @@ func main() {
 
 	h := handler.New(logger, warehouseService, shelfBlockService, shelfService)
 
-	err = http.ListenAndServe(":80", h)
-	switch err {
-	case http.ErrServerClosed:
-		logger.Log(log.Info, "server shut down successfully")
-	default:
-		logger.Log(log.Error, fmt.Sprintf("error starting up server: %v", err))
-		os.Exit(1)
+	exitChan := make(chan os.Signal, 1)
+	signal.Notify(exitChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	var wg sync.WaitGroup
+
+	server := &http.Server{Addr: ":80", Handler: h}
+	go func() {
+		wg.Add(1)
+		defer wg.Done()
+
+		if err := server.ListenAndServe(); err != nil {
+			if err == http.ErrServerClosed {
+				logger.Log(log.Info, "server shut down successfully")
+			} else {
+				logger.Log(log.Error, fmt.Sprintf("error starting up server: %v", err))
+			}
+		}
+	}()
+	logger.Log(log.Info, "Server listening on port 80")
+
+	// listen for exit signals
+	<-exitChan
+
+	// shutdown server gracefully
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		logger.Log(log.Error, fmt.Sprintf("Failed to shutdown the server %v", err))
 	}
+
+	// wait for server shutdown
+	wg.Wait()
 }

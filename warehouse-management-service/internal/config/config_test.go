@@ -17,7 +17,7 @@ func TestFromFile(t *testing.T) {
 			DBName:   "db",
 			SSLMode:  "disable",
 		},
-		DBMigration: DBMigration{SourcePath: "file://warehouse-management-service/db/migrations"},
+		DBMigrationSourcePath: "file://warehouse-management-service/db/migrations",
 	}
 
 	if err != nil || !reflect.DeepEqual(config, wantConfig) {
