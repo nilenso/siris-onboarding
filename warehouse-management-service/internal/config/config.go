@@ -6,15 +6,26 @@ import (
 	"os"
 )
 
-var environmentVariables = map[string]string{
-	"dbHost":                "DB_HOST",
-	"dbPort":                "DB_PORT",
-	"dbUsername":            "DB_USERNAME",
-	"dbPassword":            "DB_PASSWORD",
-	"dbName":                "DB_NAME",
-	"dbSSLMode":             "DB_SSL_MODE",
-	"logLevel":              "LOG_LEVEL",
-	"dbMigrationSourcePath": "DB_MIGRATION_SOURCE_PATH",
+const (
+	EnvKeyDBHost                = "DB_HOST"
+	EnvKeyDBPort                = "DB_PORT"
+	EnvKeyDBUsername            = "DB_USERNAME"
+	EnvKeyDBPassword            = "DB_PASSWORD"
+	EnvKeyDBName                = "DB_NAME"
+	EnvKeyDBSSlMode             = "DB_SSL_MODE"
+	EnvKeyLogLevel              = "LOG_LEVEL"
+	EnvKeyDBMigrationSourcePath = "DB_MIGRATION_SOURCE_PATH"
+)
+
+var environmentVariables = map[string]struct{}{
+	EnvKeyDBHost:                struct{}{},
+	EnvKeyDBPort:                struct{}{},
+	EnvKeyDBUsername:            struct{}{},
+	EnvKeyDBPassword:            struct{}{},
+	EnvKeyDBName:                struct{}{},
+	EnvKeyDBSSlMode:             struct{}{},
+	EnvKeyLogLevel:              struct{}{},
+	EnvKeyDBMigrationSourcePath: struct{}{},
 }
 
 type PostgresConfig struct {
@@ -49,24 +60,24 @@ func FromFile(path string) (*Config, error) {
 
 func FromEnv() (*Config, error) {
 	config := make(map[string]string)
-	for identifier, envVar := range environmentVariables {
-		value, ok := os.LookupEnv(envVar)
+	for envKey, _ := range environmentVariables {
+		value, ok := os.LookupEnv(envKey)
 		if !ok {
-			return nil, fmt.Errorf("unable to read environment variable: %s", envVar)
+			return nil, fmt.Errorf("unable to read environment variable: %s", envKey)
 		}
-		config[identifier] = value
+		config[envKey] = value
 	}
 	return &Config{
 			Postgres: PostgresConfig{
-				Host:     config["dbHost"],
-				Port:     config["dbPort"],
-				Username: config["dbUsername"],
-				Password: config["dbPassword"],
-				DBName:   config["dbName"],
-				SSLMode:  config["dbSSLMode"],
+				Host:     config[EnvKeyDBHost],
+				Port:     config[EnvKeyDBPort],
+				Username: config[EnvKeyDBUsername],
+				Password: config[EnvKeyDBPassword],
+				DBName:   config[EnvKeyDBName],
+				SSLMode:  config[EnvKeyDBSSlMode],
 			},
-			LogLevel:              config["logLevel"],
-			DBMigrationSourcePath: config["dbMigrationSourcePath"],
+			LogLevel:              config[EnvKeyLogLevel],
+			DBMigrationSourcePath: config[EnvKeyDBMigrationSourcePath],
 		},
 		nil
 }
