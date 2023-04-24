@@ -63,8 +63,8 @@ func main() {
 
 	h := handler.New(logger, warehouseService, shelfBlockService, shelfService, productService)
 
-	exit := make(chan os.Signal, 1)
-	signal.Notify(exit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+	exitChan := make(chan os.Signal, 1)
+	signal.Notify(exitChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	var wg sync.WaitGroup
 
@@ -84,7 +84,7 @@ func main() {
 	logger.Log(log.Info, "Server listening on port 80")
 
 	// listen for exit signals
-	<-exit
+	<-exitChan
 
 	// shutdown server gracefully
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
