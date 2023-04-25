@@ -69,8 +69,9 @@ func main() {
 	var wg sync.WaitGroup
 
 	server := &http.Server{Addr: ":80", Handler: h}
+
+	wg.Add(1)
 	go func() {
-		wg.Add(1)
 		defer wg.Done()
 
 		if err := server.ListenAndServe(); err != nil {
