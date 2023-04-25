@@ -5,11 +5,11 @@ name: warehouse-management-system
 
 on:
  push:
-   paths:
-     - warehouse-management-service/**
- pull_request:
-   paths:
-     - warehouse-management-service/**
+#    paths:
+#      - warehouse-management-service/**
+#  pull_request:
+#    paths:
+#      - warehouse-management-service/**
 
 jobs:
   golangci:
