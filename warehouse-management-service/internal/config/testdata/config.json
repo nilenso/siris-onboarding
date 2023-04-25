@@ -1,0 +1,15 @@
+{
+  "postgres": {
+    "host": "localhost",
+    "port": "5432",
+    "username": "user",
+    "password": "xxxxxxxx",
+    "dbName": "db",
+    "sslMode": "disable"
+  },
+  "dbMigrationSourcePath": "file://warehouse-management-service/db/migrations",
+  "dbMigration": {
+    "path": "file://warehouse-management-service/db/migrations"
+  },
+  "logLevel": "debug"
+}
