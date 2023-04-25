@@ -2,15 +2,10 @@ package postgres
 
 import (
 	"fmt"
-	"os"
 	"testing"
 	"warehouse-management-service/internal/config"
 
 	_ "github.com/lib/pq"
-)
-
-const (
-	EnvConfigFilePath = "CONFIG_FILE_PATH"
 )
 
 var warehouseService *WarehouseService
@@ -19,12 +14,7 @@ var shelfService *ShelfService
 var postgres *Postgres
 
 func TestMain(m *testing.M) {
-	configFilePath, ok := os.LookupEnv(EnvConfigFilePath)
-	if !ok {
-		panic("Failed to read environment variable")
-	}
-
-	cfg, err := config.FromFile(configFilePath)
+	cfg, err := config.FromEnv()
 	if err != nil {
 		panic(fmt.Sprintf("Failed to read config file: %v", err))
 	}
