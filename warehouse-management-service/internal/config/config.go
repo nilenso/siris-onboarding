@@ -60,7 +60,7 @@ func FromFile(path string) (*Config, error) {
 
 func FromEnv() (*Config, error) {
 	config := make(map[string]string)
-	for envKey, _ := range environmentVariables {
+	for envKey := range environmentVariables {
 		value, ok := os.LookupEnv(envKey)
 		if !ok {
 			return nil, fmt.Errorf("unable to read environment variable: %s", envKey)
