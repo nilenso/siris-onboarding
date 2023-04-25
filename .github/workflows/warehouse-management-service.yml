@@ -4,7 +4,7 @@
 name: warehouse-management-system
 
 on:
- push:
+  push:
 #    paths:
 #      - warehouse-management-service/**
 #  pull_request:
@@ -12,13 +12,12 @@ on:
 #      - warehouse-management-service/**
 
 jobs:
-  golangci:
-    name: lint
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v4
         with:
-          go-version: '1.17'
+          go-version: "1.17"
           cache: false
       - uses: actions/checkout@v3
       - name: golangci-lint
@@ -27,28 +26,53 @@ jobs:
           version: latest
           working-directory: ./warehouse-management-service
 
-  build:
+  test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v3
-
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.19
-
-      - name: Build
-        run: |
-          cd warehouse-management-service
-          go build -v ./cmd/wms
-
       - name: Test
         env:
-          CONFIG_FILE_PATH: ""
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_USERNAME: wms
+          DB_PASSWORD: postgres
+          DB_NAME: test_wms
+          DB_SSL_MODE: disable
+          LOG_LEVEL: debug
+          DB_MIGRATION_SOURCE_PATH: file:///warehouse-management-service/db/migrations
         run: |
           cd warehouse-management-service
           go test -v ./...
 
+  build-and-deploy-staging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+      - name: Build
+        run: |
+          cd warehouse-management-service
+          go build -v ./cmd/wms
       - name: Deploy
         run: |
           ls
