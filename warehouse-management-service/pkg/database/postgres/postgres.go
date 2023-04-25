@@ -33,5 +33,5 @@ func (p *Postgres) Open() (*sql.DB, error) {
 }
 
 func buildConnectionURL(config config.PostgresConfig) string {
-	return fmt.Sprintf("postgresql://%s@%s:%s/%s?sslmode=%s", config.Username, config.Host, config.Port, config.DBName, config.SSLMode)
+	return fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s", config.Username, config.Password, config.Host, config.Port, config.DBName, config.SSLMode)
 }

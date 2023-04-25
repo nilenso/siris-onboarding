@@ -16,7 +16,7 @@ var postgres *Postgres
 func TestMain(m *testing.M) {
 	cfg, err := config.FromEnv()
 	if err != nil {
-		panic(fmt.Sprintf("Failed to read config file: %v", err))
+		panic(fmt.Sprintf("Failed to read config: %v", err))
 	}
 
 	postgres = New(cfg.Postgres)
