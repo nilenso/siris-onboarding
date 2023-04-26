@@ -77,5 +77,9 @@ jobs:
           go build -v -o ./resources ./cmd/wms/
       - name: Deploy
         run: |
-          echo "${{ secrets.STAGING_SERVER_KEY }}" > sftp_key
-          sftp -i sftp_key ${{ secrets.STAGING_SERVER_USER }}@${{ secrets.STAGING_SERVER_HOST }}
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.STAGING_SERVER_KEY }}" > sftp_private_key
+          sudo chmod 600 sftp_private_key
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          sftp -i sftp_private_key ${{ secrets.STAGING_SERVER_USER }}@${{ secrets.STAGING_SERVER_HOST }}
+          "put resource/ ~/wms/"
