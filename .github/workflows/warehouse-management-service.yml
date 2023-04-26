@@ -85,10 +85,11 @@ jobs:
           local_path: "./warehouse-management-service/resources/"
           remote_path: "wms"
           sftp_only: true
-        # run: |
-        #   mkdir -p ~/.ssh/
-        #   echo "${{ secrets.STAGING_SERVER_KEY }}" > sftp_private_key
-        #   sudo chmod 600 sftp_private_key
-        #   echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-        #   sftp -i sftp_private_key ${{ secrets.STAGING_SERVER_USER }}@${{ secrets.STAGING_SERVER_HOST }}
-        #   "put resource/ ~/wms/"
+      - name: Restart Server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_SERVER_HOST }}
+          username: ${{ secrets.STAGING_SERVER_USER }}
+          key: ${{ secrets.STAGING_SERVER_KEY }}
+          password: ${{ secrets.STAGING_SERVER_PASSWORD }}
+          script: sudo systemctl restart wms_staging
