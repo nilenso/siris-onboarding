@@ -68,7 +68,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	server := &http.Server{Addr: ":80", Handler: h}
+	server := &http.Server{Addr: fmt.Sprintf(":%v", appConfig.Port), Handler: h}
 
 	wg.Add(1)
 	go func() {
@@ -82,7 +82,7 @@ func main() {
 			}
 		}
 	}()
-	logger.Log(log.Info, "Server listening on port 80")
+	logger.Log(log.Info, fmt.Sprintf("Server listening on port %v", appConfig.Port))
 
 	// listen for exit signals
 	<-exitChan
