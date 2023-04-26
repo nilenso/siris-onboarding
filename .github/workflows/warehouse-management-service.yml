@@ -93,3 +93,35 @@ jobs:
           key: ${{ secrets.STAGING_SERVER_KEY }}
           password: ${{ secrets.STAGING_SERVER_PASSWORD }}
           script: sudo systemctl restart wms_staging
+
+  build-and-deploy-prod:
+    needs: [lint, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.19
+      - name: Build
+        run: |
+          cd warehouse-management-service
+          go build -v -o ./resources ./cmd/wms/
+          ls
+      - name: Deploy
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+        with:
+          username: ${{ secrets.PROD_SERVER_USER }}
+          server: ${{ secrets.PROD_SERVER_HOST }}
+          ssh_private_key: ${{ secrets.PROD_SERVER_KEY }}
+          local_path: "./warehouse-management-service/resources/"
+          remote_path: "wms"
+          sftp_only: true
+      - name: Restart Server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.PROD_SERVER_HOST }}
+          username: ${{ secrets.PROD_SERVER_USER }}
+          key: ${{ secrets.PROD_SERVER_KEY }}
+          password: ${{ secrets.PROD_SERVER_PASSWORD }}
+          script: sudo systemctl restart wms
