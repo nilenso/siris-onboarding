@@ -56,7 +56,7 @@ jobs:
           DB_NAME: postgres
           DB_SSL_MODE: disable
           LOG_LEVEL: debug
-          DB_MIGRATION_SOURCE_PATH: file:///${{ github.workspace }}/warehouse-management-service/db/migrations
+          DB_MIGRATION_SOURCE_PATH: file:///${{ github.workspace }}/warehouse-management-service/resources/db/migrations
         run: |
           cd warehouse-management-service
           go test -v ./...
@@ -72,8 +72,12 @@ jobs:
       - name: Build
         run: |
           cd warehouse-management-service
-          go build -v ./cmd/wms
+          go build -v -o ./resources ./cmd/wms/
       - name: Deploy
-        run: |
-          ls
-          sftp -i ./wms ${{ secrets.SERVER_USER }}@${{ secrets.SERVER }}
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.STAGING_SERVER_HOST}}
+          username: ${{ secrets.STAGING_SERVER_USER }}
+          password: ${{ secrets.STAGING_SERVER_PASSWORD }}
+          local-dir: ${{ github.workspace }}/warehouse-management-service/resources/
+          server-dir: wms/
