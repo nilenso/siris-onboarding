@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	EnvKeyPort                  = "PORT"
 	EnvKeyDBHost                = "DB_HOST"
 	EnvKeyDBPort                = "DB_PORT"
 	EnvKeyDBUsername            = "DB_USERNAME"
@@ -18,14 +19,15 @@ const (
 )
 
 var environmentVariables = map[string]struct{}{
-	EnvKeyDBHost:                struct{}{},
-	EnvKeyDBPort:                struct{}{},
-	EnvKeyDBUsername:            struct{}{},
-	EnvKeyDBPassword:            struct{}{},
-	EnvKeyDBName:                struct{}{},
-	EnvKeyDBSSlMode:             struct{}{},
-	EnvKeyLogLevel:              struct{}{},
-	EnvKeyDBMigrationSourcePath: struct{}{},
+	EnvKeyPort:                  {},
+	EnvKeyDBHost:                {},
+	EnvKeyDBPort:                {},
+	EnvKeyDBUsername:            {},
+	EnvKeyDBPassword:            {},
+	EnvKeyDBName:                {},
+	EnvKeyDBSSlMode:             {},
+	EnvKeyLogLevel:              {},
+	EnvKeyDBMigrationSourcePath: {},
 }
 
 type PostgresConfig struct {
@@ -38,6 +40,7 @@ type PostgresConfig struct {
 }
 
 type Config struct {
+	Port                  string         `json:"port"`
 	LogLevel              string         `json:"logLevel"`
 	Postgres              PostgresConfig `json:"postgres"`
 	DBMigrationSourcePath string         `json:"dbMigrationSourcePath"`
@@ -68,6 +71,7 @@ func FromEnv() (*Config, error) {
 		config[envKey] = value
 	}
 	return &Config{
+			Port: config[EnvKeyPort],
 			Postgres: PostgresConfig{
 				Host:     config[EnvKeyDBHost],
 				Port:     config[EnvKeyDBPort],

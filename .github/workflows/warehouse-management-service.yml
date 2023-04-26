@@ -49,6 +49,7 @@ jobs:
           go-version: 1.19
       - name: Test
         env:
+          PORT: 80
           DB_HOST: localhost
           DB_PORT: 5432
           DB_USERNAME: postgres
