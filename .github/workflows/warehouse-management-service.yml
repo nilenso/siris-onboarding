@@ -75,6 +75,7 @@ jobs:
         run: |
           cd warehouse-management-service
           go build -v -o ./resources ./cmd/wms/
+          echo ${{ secrets.STAGING_SERVER_HOST}}
       - name: Deploy
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
