@@ -77,10 +77,11 @@ jobs:
           go build -v -o ./resources ./cmd/wms/
           echo ${{ secrets.STAGING_SERVER_HOST}}
       - name: Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v3.1.2
         with:
           server: ${{ secrets.STAGING_SERVER_HOST}}
           username: ${{ secrets.STAGING_SERVER_USER }}
           password: ${{ secrets.STAGING_SERVER_PASSWORD }}
           local-dir: ${{ github.workspace }}/warehouse-management-service/resources/
           server-dir: wms/
+          METHOD: sftp
